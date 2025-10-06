@@ -917,7 +917,7 @@
                         alert('E-mail ou senha incorretos!');
                     }
                 } else { // Operator
-                    const { data: operator, error } = await supabase
+                    const { data: operator, error } = await supabaseClient
                         .from('operators')
                         .select('*, markets(*)')
                         .eq('email', email)
@@ -1023,7 +1023,7 @@
         document.getElementById('productCode').addEventListener('input', renderProducts);
 
         async function addToCart(productId) {
-            const { data: product, error } = await supabase
+            const { data: product, error } = await supabaseClient
                 .from('products')
                 .select('*')
                 .eq('id', productId)
@@ -1079,7 +1079,7 @@
             const cartItem = cart.find(item => item.id === productId);
             if (!cartItem) return;
 
-            const { data: product, error } = await supabase
+            const { data: product, error } = await supabaseClient
                 .from('products')
                 .select('stock')
                 .eq('id', productId)
@@ -1152,7 +1152,7 @@
                 // Atualizar estoque
                 for (const item of cart) {
                     const newStock = item.stock - item.qty;
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('products')
                         .update({ stock: newStock })
                         .eq('id', item.id);
@@ -1171,7 +1171,7 @@
                     market_id: currentUser.market_id
                 };
                 
-                const { data: newSale, error: saleError } = await supabase
+                const { data: newSale, error: saleError } = await supabaseClient
                     .from('sales')
                     .insert([saleData])
                     .select()

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema PDV - Supermercado</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -630,7 +631,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Tela de Login -->
         <div class="auth-container" id="loginScreen">
             <div class="auth-header">
                 <h2>🛒 Sistema PDV</h2>
@@ -661,7 +661,6 @@
             </div>
         </div>
 
-        <!-- Tela de Cadastro -->
         <div class="auth-container hidden" id="registerScreen">
             <div class="auth-header">
                 <h2>📝 Cadastro do Mercado</h2>
@@ -705,7 +704,6 @@
             </div>
         </div>
 
-        <!-- Sistema PDV -->
         <div class="pdv-container" id="pdvScreen">
             <div class="pdv-header">
                 <h1 id="marketNameDisplay">🛒 Sistema PDV</h1>
@@ -721,7 +719,7 @@
                         <h3>Produtos</h3>
                         <div class="search-box">
                             <input type="text" id="searchProduct" placeholder="Buscar produto por código ou nome...">
-                            <input type="number" id="productCode" placeholder="Código" style="max-width: 120px;">
+                            <input type="text" id="productCode" placeholder="Código" style="max-width: 120px;">
                         </div>
                         <div class="products-grid" id="productsGrid"></div>
                     </div>
@@ -764,7 +762,6 @@
             </div>
         </div>
 
-        <!-- Painel Admin -->
         <div class="pdv-container admin-panel" id="adminPanel">
             <div class="pdv-header">
                 <h1>⚙️ Painel Administrativo</h1>
@@ -772,13 +769,12 @@
             </div>
             <div style="padding: 30px;">
                 <div class="admin-tabs">
-                    <button class="admin-tab active" onclick="switchTab('products')">Produtos</button>
-                    <button class="admin-tab" onclick="switchTab('operators')">Operadores</button>
-                    <button class="admin-tab" onclick="switchTab('sales')">Vendas</button>
-                    <button class="admin-tab" onclick="switchTab('config')">Configurações</button>
+                    <button class="admin-tab active" onclick="switchTab(event, 'products')">Produtos</button>
+                    <button class="admin-tab" onclick="switchTab(event, 'operators')">Operadores</button>
+                    <button class="admin-tab" onclick="switchTab(event, 'sales')">Vendas</button>
+                    <button class="admin-tab" onclick="switchTab(event, 'config')">Configurações</button>
                 </div>
 
-                <!-- Tab Produtos -->
                 <div class="admin-content active" id="tabProducts">
                     <button class="btn btn-primary" onclick="addProduct()" style="margin-bottom: 20px; width: auto;">+ Adicionar Produto</button>
                     <div class="table-container">
@@ -797,7 +793,6 @@
                     </div>
                 </div>
 
-                <!-- Tab Operadores -->
                 <div class="admin-content" id="tabOperators">
                     <button class="btn btn-primary" onclick="addOperator()" style="margin-bottom: 20px; width: auto;">+ Adicionar Operador</button>
                     <div class="table-container">
@@ -815,7 +810,6 @@
                     </div>
                 </div>
 
-                <!-- Tab Vendas -->
                 <div class="admin-content" id="tabSales">
                     <div class="table-container">
                         <table>
@@ -833,7 +827,6 @@
                     </div>
                 </div>
 
-                <!-- Tab Configurações -->
                 <div class="admin-content" id="tabConfig">
                     <div style="max-width: 600px;">
                         <h3 style="margin-bottom: 20px;">Dados do Mercado</h3>
@@ -866,7 +859,6 @@
         </div>
     </div>
 
-    <!-- Modal Cupom Fiscal -->
     <div class="modal" id="cupomModal">
         <div class="modal-content">
             <div class="cupom-fiscal" id="cupomContent"></div>
@@ -878,32 +870,18 @@
     </div>
 
     <script>
-        // Dados em memória
+        // --- Configuração do Supabase ---
+        const SUPABASE_URL = 'https://eymchtbskyhqghjwclkb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bWNodGJza3locWdoandjbGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3Njk0NjUsImV4cCI6MjA3NTM0NTQ2NX0.eYzu0GHVcezfDZRq8-Eig1G-feXVOPBLU-566jVwfcs';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- Variáveis de Estado Global ---
         let currentUser = null;
         let marketData = null;
-        let products = [];
-        let operators = [];
-        let sales = [];
         let cart = [];
         let selectedPayment = 'money';
 
-        // Inicializar dados de exemplo
-        function initData() {
-            products = [
-                {id: 1, code: '7891000100103', name: 'Arroz Branco 5kg', price: 25.90, stock: 50},
-                {id: 2, code: '7891000100110', name: 'Feijão Preto 1kg', price: 8.50, stock: 80},
-                {id: 3, code: '7891000100127', name: 'Açúcar Cristal 1kg', price: 4.20, stock: 100},
-                {id: 4, code: '7891000100134', name: 'Óleo de Soja 900ml', price: 7.90, stock: 60},
-                {id: 5, code: '7891000100141', name: 'Macarrão Espaguete', price: 3.50, stock: 120},
-                {id: 6, code: '7891000100158', name: 'Café Torrado 500g', price: 15.80, stock: 40},
-                {id: 7, code: '7891000100165', name: 'Leite Integral 1L', price: 4.99, stock: 90},
-                {id: 8, code: '7891000100172', name: 'Papel Higiênico 12un', price: 18.90, stock: 35},
-            ];
-        }
-
-        initData();
-
-        // Funções de navegação
+        // --- Funções de Navegação ---
         function showLoginScreen() {
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
@@ -914,55 +892,79 @@
             document.getElementById('registerScreen').classList.remove('hidden');
         }
 
-        // Login
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        // --- Autenticação ---
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             const type = document.getElementById('loginType').value;
 
-            if (type === 'owner') {
-                if (!marketData) {
-                    alert('Nenhum mercado cadastrado. Por favor, faça o cadastro primeiro.');
-                    showRegisterScreen();
-                    return;
+            try {
+                if (type === 'owner') {
+                    const { data, error } = await supabase
+                        .from('markets')
+                        .select('*')
+                        .eq('email', email)
+                        .single();
+
+                    if (error || !data) throw new Error('Dono não encontrado.');
+                    
+                    if (data.password === password) { // Simplificado. Use autenticação do Supabase (Auth) para segurança.
+                        marketData = data;
+                        currentUser = { type: 'owner', name: marketData.name, email: email, market_id: marketData.id };
+                        await showPDV();
+                    } else {
+                        alert('E-mail ou senha incorretos!');
+                    }
+                } else { // Operator
+                    const { data: operator, error } = await supabase
+                        .from('operators')
+                        .select('*, markets(*)')
+                        .eq('email', email)
+                        .single();
+
+                    if (error || !operator) throw new Error('Operador não encontrado.');
+                    
+                    if (operator.password === password) { // Simplificado.
+                        marketData = operator.markets;
+                        currentUser = { type: 'operator', name: operator.name, email: email, market_id: marketData.id };
+                        await showPDV();
+                    } else {
+                        alert('E-mail ou senha incorretos!');
+                    }
                 }
-                if (email === marketData.email && password === marketData.password) {
-                    currentUser = {type: 'owner', name: marketData.name, email: email};
-                    showPDV();
-                } else {
-                    alert('E-mail ou senha incorretos!');
-                }
-            } else {
-                const operator = operators.find(op => op.email === email && op.password === password);
-                if (operator) {
-                    currentUser = {type: 'operator', name: operator.name, email: email};
-                    showPDV();
-                } else {
-                    alert('E-mail ou senha incorretos!');
-                }
+            } catch (error) {
+                console.error('Erro no login:', error);
+                alert('Falha no login. Verifique os dados e tente novamente.');
             }
         });
 
-        // Cadastro
-        document.getElementById('registerForm').addEventListener('submit', (e) => {
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            marketData = {
+            const newMarket = {
                 name: document.getElementById('regMarketName').value,
                 cnpj: document.getElementById('regCNPJ').value,
                 address: document.getElementById('regAddress').value,
                 phone: document.getElementById('regPhone').value,
                 email: document.getElementById('regEmail').value,
-                password: document.getElementById('regPassword').value,
+                password: document.getElementById('regPassword').value, // ATENÇÃO: Nunca armazene senhas em texto plano em produção!
                 logo: document.getElementById('regLogo').value || ''
             };
-            alert('Mercado cadastrado com sucesso! Faça login para continuar.');
-            showLoginScreen();
-            document.getElementById('registerForm').reset();
+
+            const { data, error } = await supabase.from('markets').insert([newMarket]).select();
+
+            if (error) {
+                console.error('Erro ao cadastrar mercado:', error);
+                alert('Erro ao cadastrar. O e-mail ou CNPJ pode já estar em uso.');
+            } else {
+                alert('Mercado cadastrado com sucesso! Faça login para continuar.');
+                showLoginScreen();
+                document.getElementById('registerForm').reset();
+            }
         });
 
-        // Mostrar PDV
-        function showPDV() {
+        // --- Lógica do PDV ---
+        async function showPDV() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
             document.getElementById('pdvScreen').style.display = 'block';
@@ -973,34 +975,42 @@
                 document.getElementById('adminBtn').style.display = 'none';
             }
             
-            renderProducts();
+            await renderProducts();
             renderCart();
         }
 
-        // Logout
         function logout() {
             currentUser = null;
+            marketData = null;
             document.getElementById('pdvScreen').style.display = 'none';
             document.getElementById('adminPanel').style.display = 'none';
             showLoginScreen();
             clearCart();
         }
 
-        // Renderizar produtos
-        function renderProducts() {
+        async function renderProducts() {
             const grid = document.getElementById('productsGrid');
             const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
             const codeSearch = document.getElementById('productCode').value;
             
-            let filtered = products;
+            let query = supabase.from('products').select('*').eq('market_id', currentUser.market_id);
+            
             if (searchTerm) {
-                filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm) || p.code.includes(searchTerm));
+                 query = query.or(`name.ilike.%${searchTerm}%,code.ilike.%${searchTerm}%`);
             }
             if (codeSearch) {
-                filtered = filtered.filter(p => p.code.includes(codeSearch));
+                query = query.ilike('code', `%${codeSearch}%`);
             }
             
-            grid.innerHTML = filtered.map(p => `
+            const { data: products, error } = await query;
+
+            if (error) {
+                console.error("Erro ao buscar produtos:", error);
+                grid.innerHTML = "<p>Erro ao carregar produtos.</p>";
+                return;
+            }
+            
+            grid.innerHTML = products.map(p => `
                 <div class="product-card" onclick="addToCart(${p.id})">
                     <h4>${p.name}</h4>
                     <div class="price">R$ ${p.price.toFixed(2)}</div>
@@ -1012,10 +1022,17 @@
         document.getElementById('searchProduct').addEventListener('input', renderProducts);
         document.getElementById('productCode').addEventListener('input', renderProducts);
 
-        // Adicionar ao carrinho
-        function addToCart(productId) {
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
+        async function addToCart(productId) {
+            const { data: product, error } = await supabase
+                .from('products')
+                .select('*')
+                .eq('id', productId)
+                .single();
+
+            if (error || !product) {
+                alert('Produto não encontrado!');
+                return;
+            }
             
             if (product.stock <= 0) {
                 alert('Produto sem estoque!');
@@ -1025,7 +1042,7 @@
             const cartItem = cart.find(item => item.id === productId);
             if (cartItem) {
                 if (cartItem.qty >= product.stock) {
-                    alert('Quantidade máxima atingida!');
+                    alert('Quantidade máxima em estoque atingida!');
                     return;
                 }
                 cartItem.qty++;
@@ -1035,7 +1052,6 @@
             renderCart();
         }
 
-        // Renderizar carrinho
         function renderCart() {
             const cartDiv = document.getElementById('cartItems');
             if (cart.length === 0) {
@@ -1059,10 +1075,20 @@
             updateTotals();
         }
 
-        // Atualizar quantidade
-        function updateQty(productId, change) {
+        async function updateQty(productId, change) {
             const cartItem = cart.find(item => item.id === productId);
-            const product = products.find(p => p.id === productId);
+            if (!cartItem) return;
+
+            const { data: product, error } = await supabase
+                .from('products')
+                .select('stock')
+                .eq('id', productId)
+                .single();
+
+            if (error || !product) {
+                 alert('Erro ao verificar estoque do produto.');
+                 return;
+            }
             
             if (cartItem) {
                 cartItem.qty += change;
@@ -1070,33 +1096,29 @@
                     removeFromCart(productId);
                 } else if (cartItem.qty > product.stock) {
                     cartItem.qty = product.stock;
-                    alert('Quantidade máxima atingida!');
+                    alert('Quantidade máxima em estoque atingida!');
                 }
                 renderCart();
             }
         }
 
-        // Remover do carrinho
         function removeFromCart(productId) {
             cart = cart.filter(item => item.id !== productId);
             renderCart();
         }
 
-        // Limpar carrinho
         function clearCart() {
             if (cart.length > 0 && !confirm('Deseja realmente limpar o carrinho?')) return;
             cart = [];
             renderCart();
         }
 
-        // Atualizar totais
         function updateTotals() {
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             document.getElementById('subtotal').textContent = 'R$ ' + subtotal.toFixed(2);
             document.getElementById('total').textContent = 'R$ ' + subtotal.toFixed(2);
         }
 
-        // Métodos de pagamento
         document.querySelectorAll('.payment-method').forEach(method => {
             method.addEventListener('click', function() {
                 document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
@@ -1105,7 +1127,6 @@
             });
         });
 
-        // Calcular troco
         document.getElementById('receivedValue').addEventListener('input', function() {
             const received = parseFloat(this.value) || 0;
             const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -1113,8 +1134,7 @@
             document.getElementById('changeValue').value = change >= 0 ? 'R$ ' + change.toFixed(2) : 'R$ 0,00';
         });
 
-        // Finalizar venda
-        function finalizeSale() {
+        async function finalizeSale() {
             if (cart.length === 0) {
                 alert('Carrinho vazio!');
                 return;
@@ -1128,37 +1148,52 @@
                 return;
             }
             
-            // Atualizar estoque
-            cart.forEach(item => {
-                const product = products.find(p => p.id === item.id);
-                if (product) product.stock -= item.qty;
-            });
-            
-            // Salvar venda
-            const sale = {
-                id: sales.length + 1,
-                date: new Date().toLocaleString('pt-BR'),
-                operator: currentUser.name,
-                items: [...cart],
-                total: total,
-                payment: selectedPayment,
-                received: received,
-                change: received - total
-            };
-            sales.push(sale);
-            
-            // Mostrar cupom
-            showCupom(sale);
-            
-            // Limpar carrinho
-            cart = [];
-            document.getElementById('receivedValue').value = '';
-            document.getElementById('changeValue').value = '';
-            renderCart();
-            renderProducts();
+            try {
+                // Atualizar estoque
+                for (const item of cart) {
+                    const newStock = item.stock - item.qty;
+                    const { error } = await supabase
+                        .from('products')
+                        .update({ stock: newStock })
+                        .eq('id', item.id);
+                    if (error) throw new Error(`Falha ao atualizar estoque do produto ${item.name}: ${error.message}`);
+                }
+                
+                // Salvar venda
+                const saleData = {
+                    date: new Date().toLocaleString('pt-BR'),
+                    operator: currentUser.name,
+                    items: cart, // Armazenando um JSON com os itens
+                    total: total,
+                    payment: selectedPayment,
+                    received: received,
+                    change: received > total ? received - total : 0,
+                    market_id: currentUser.market_id
+                };
+                
+                const { data: newSale, error: saleError } = await supabase
+                    .from('sales')
+                    .insert([saleData])
+                    .select()
+                    .single();
+
+                if (saleError) throw new Error(`Falha ao registrar a venda: ${saleError.message}`);
+
+                showCupom(newSale);
+                
+                cart = [];
+                document.getElementById('receivedValue').value = '';
+                document.getElementById('changeValue').value = '';
+                renderCart();
+                await renderProducts();
+
+            } catch (error) {
+                console.error("Erro ao finalizar venda:", error);
+                alert("Ocorreu um erro. A venda não foi finalizada. Verifique sua conexão e o estoque dos produtos.");
+            }
         }
 
-        // Mostrar cupom fiscal
+        // --- Cupom Fiscal ---
         function showCupom(sale) {
             const paymentNames = {
                 money: 'DINHEIRO',
@@ -1177,7 +1212,7 @@
                 </div>
                 <div style="margin: 15px 0;">
                     <strong>CUPOM FISCAL</strong><br>
-                    Data: ${sale.date}<br>
+                    Data: ${new Date(sale.created_at).toLocaleString('pt-BR')}<br>
                     Operador: ${sale.operator}
                 </div>
                 <div style="border-top: 1px dashed #333; border-bottom: 1px dashed #333; padding: 10px 0; margin: 10px 0;">
@@ -1242,8 +1277,8 @@
             window.print();
         }
 
-        // Admin Panel
-        function toggleAdmin() {
+        // --- Painel Administrativo ---
+        async function toggleAdmin() {
             if (currentUser?.type !== 'owner') {
                 alert('Acesso negado! Apenas o dono pode acessar o painel administrativo.');
                 return;
@@ -1258,11 +1293,11 @@
             } else {
                 pdv.style.display = 'none';
                 admin.style.display = 'block';
-                loadAdminData();
+                await loadAdminData();
             }
         }
 
-        function switchTab(tab) {
+        function switchTab(event, tab) {
             document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
             
@@ -1270,14 +1305,16 @@
             document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
         }
 
-        function loadAdminData() {
-            renderProductsTable();
-            renderOperatorsTable();
-            renderSalesTable();
+        async function loadAdminData() {
+            await renderProductsTable();
+            await renderOperatorsTable();
+            await renderSalesTable();
             loadConfigData();
         }
 
-        function renderProductsTable() {
+        async function renderProductsTable() {
+            const { data: products, error } = await supabase.from('products').select('*').eq('market_id', currentUser.market_id);
+            if (error) { console.error(error); return; }
             const tbody = document.getElementById('productsTableBody');
             tbody.innerHTML = products.map(p => `
                 <tr>
@@ -1293,7 +1330,9 @@
             `).join('');
         }
 
-        function renderOperatorsTable() {
+        async function renderOperatorsTable() {
+            const { data: operators, error } = await supabase.from('operators').select('*').eq('market_id', currentUser.market_id);
+            if (error) { console.error(error); return; }
             const tbody = document.getElementById('operatorsTableBody');
             tbody.innerHTML = operators.map(op => `
                 <tr>
@@ -1308,11 +1347,13 @@
             `).join('');
         }
 
-        function renderSalesTable() {
+        async function renderSalesTable() {
+            const { data: sales, error } = await supabase.from('sales').select('*').eq('market_id', currentUser.market_id).order('created_at', { ascending: false });
+            if (error) { console.error(error); return; }
             const tbody = document.getElementById('salesTableBody');
             tbody.innerHTML = sales.map(s => `
                 <tr>
-                    <td>${s.date}</td>
+                    <td>${new Date(s.created_at).toLocaleString('pt-BR')}</td>
                     <td>${s.operator}</td>
                     <td>R$ ${s.total.toFixed(2)}</td>
                     <td>${s.payment.toUpperCase()}</td>
@@ -1333,65 +1374,66 @@
             }
         }
 
-        document.getElementById('configForm').addEventListener('submit', (e) => {
+        document.getElementById('configForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            marketData.name = document.getElementById('cfgMarketName').value;
-            marketData.cnpj = document.getElementById('cfgCNPJ').value;
-            marketData.address = document.getElementById('cfgAddress').value;
-            marketData.phone = document.getElementById('cfgPhone').value;
-            marketData.logo = document.getElementById('cfgLogo').value;
-            alert('Configurações salvas com sucesso!');
+            const updatedMarket = {
+                name: document.getElementById('cfgMarketName').value,
+                cnpj: document.getElementById('cfgCNPJ').value,
+                address: document.getElementById('cfgAddress').value,
+                phone: document.getElementById('cfgPhone').value,
+                logo: document.getElementById('cfgLogo').value
+            };
+            const { data, error } = await supabase.from('markets').update(updatedMarket).eq('id', currentUser.market_id).select().single();
+            if (error) {
+                console.error(error);
+                alert("Erro ao salvar configurações.");
+            } else {
+                marketData = data; // Atualiza os dados locais
+                alert('Configurações salvas com sucesso!');
+            }
         });
 
-        // CRUD Produtos
-        function addProduct() {
+        // --- CRUD Produtos (Admin) ---
+        async function addProduct() {
             const name = prompt('Nome do produto:');
             if (!name) return;
             const code = prompt('Código de barras:');
             if (!code) return;
             const price = parseFloat(prompt('Preço:'));
-            if (!price) return;
+            if (isNaN(price)) return;
             const stock = parseInt(prompt('Estoque:'));
-            if (!stock && stock !== 0) return;
+            if (isNaN(stock)) return;
             
-            products.push({
-                id: products.length + 1,
-                code: code,
-                name: name,
-                price: price,
-                stock: stock
-            });
-            renderProductsTable();
-            renderProducts();
+            const { error } = await supabase.from('products').insert([{ name, code, price, stock, market_id: currentUser.market_id }]);
+            if (error) { console.error(error); alert("Erro ao adicionar produto."); }
+            else { await renderProductsTable(); await renderProducts(); }
         }
 
-        function editProduct(id) {
-            const product = products.find(p => p.id === id);
-            if (!product) return;
+        async function editProduct(id) {
+            const { data: product, error: fetchError } = await supabase.from('products').select('*').eq('id', id).single();
+            if (fetchError || !product) { alert("Produto não encontrado."); return; }
             
             const name = prompt('Nome do produto:', product.name);
             if (!name) return;
             const price = parseFloat(prompt('Preço:', product.price));
-            if (!price) return;
+            if (isNaN(price)) return;
             const stock = parseInt(prompt('Estoque:', product.stock));
-            if (!stock && stock !== 0) return;
+            if (isNaN(stock)) return;
             
-            product.name = name;
-            product.price = price;
-            product.stock = stock;
-            renderProductsTable();
-            renderProducts();
+            const { error } = await supabase.from('products').update({ name, price, stock }).eq('id', id);
+            if (error) { console.error(error); alert("Erro ao editar produto."); }
+            else { await renderProductsTable(); await renderProducts(); }
         }
 
-        function deleteProduct(id) {
+        async function deleteProduct(id) {
             if (!confirm('Deseja realmente excluir este produto?')) return;
-            products = products.filter(p => p.id !== id);
-            renderProductsTable();
-            renderProducts();
+            const { error } = await supabase.from('products').delete().eq('id', id);
+            if (error) { console.error(error); alert("Erro ao excluir produto."); }
+            else { await renderProductsTable(); await renderProducts(); }
         }
 
-        // CRUD Operadores
-        function addOperator() {
+        // --- CRUD Operadores (Admin) ---
+        async function addOperator() {
             const name = prompt('Nome do operador:');
             if (!name) return;
             const email = prompt('E-mail:');
@@ -1399,44 +1441,37 @@
             const password = prompt('Senha:');
             if (!password) return;
             
-            operators.push({
-                id: operators.length + 1,
-                name: name,
-                email: email,
-                password: password,
-                active: true
-            });
-            renderOperatorsTable();
+            const { error } = await supabase.from('operators').insert([{ name, email, password, active: true, market_id: currentUser.market_id }]);
+            if (error) { console.error(error); alert("Erro ao adicionar operador."); }
+            else { await renderOperatorsTable(); }
         }
 
-        function editOperator(id) {
-            const operator = operators.find(op => op.id === id);
-            if (!operator) return;
+        async function editOperator(id) {
+            const { data: operator, error: fetchError } = await supabase.from('operators').select('*').eq('id', id).single();
+            if (fetchError || !operator) { alert("Operador não encontrado."); return; }
             
             const name = prompt('Nome do operador:', operator.name);
             if (!name) return;
             const email = prompt('E-mail:', operator.email);
             if (!email) return;
             
-            operator.name = name;
-            operator.email = email;
-            renderOperatorsTable();
+            const { error } = await supabase.from('operators').update({ name, email }).eq('id', id);
+            if (error) { console.error(error); alert("Erro ao editar operador."); }
+            else { await renderOperatorsTable(); }
         }
 
-        function deleteOperator(id) {
+        async function deleteOperator(id) {
             if (!confirm('Deseja realmente excluir este operador?')) return;
-            operators = operators.filter(op => op.id !== id);
-            renderOperatorsTable();
+            const { error } = await supabase.from('operators').delete().eq('id', id);
+            if (error) { console.error(error); alert("Erro ao excluir operador."); }
+            else { await renderOperatorsTable(); }
         }
 
-        function viewSale(id) {
-            const sale = sales.find(s => s.id === id);
-            if (sale) showCupom(sale);
+        async function viewSale(id) {
+            const { data: sale, error } = await supabase.from('sales').select('*').eq('id', id).single();
+            if (error) { console.error(error); alert("Venda não encontrada."); }
+            else { showCupom(sale); }
         }
-
-        // Inicializar
-        renderProducts();
     </script>
 </body>
-</html>
 </html>

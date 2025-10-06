@@ -7,10 +7,10 @@
 
     <meta name="theme-color" content="#2563eb"/>
     <meta name="description" content="Sistema de Ponto de Venda para Supermercados"/>
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAaklEQVR42u3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOA1v9QAATX6i/GAAAAAElFTkSuQmCC">
     <link rel="manifest" href='data:application/manifest+json,{
     "name": "Sistema PDV Supermercado",
-    "short_name": "PDV",
+    "short_name": "PDV Supermercado",
     "description": "Sistema de Ponto de Venda para Supermercados",
     "start_url": ".",
     "display": "standalone",
@@ -18,12 +18,12 @@
     "theme_color": "#2563eb",
     "icons": [
         {
-            "src": "icon-192.png",
+            "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAaklEQVR42u3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOA1v9QAATX6i/GAAAAAElFTkSuQmCC",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "icon-512.png",
+            "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAYAAAD0eNT6AAAAa0lEQVR42u3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACA2AY+QAAE82g4WwAAAABJRU5ErkJggg==",
             "sizes": "512x512",
             "type": "image/png"
         }
@@ -548,6 +548,7 @@
             gap: 10px;
             margin-bottom: 30px;
             border-bottom: 2px solid var(--light);
+            flex-wrap: wrap;
         }
 
         .admin-tab {
@@ -577,7 +578,7 @@
         .table-container {
             background: var(--white);
             border-radius: 12px;
-            overflow: hidden;
+            overflow-x: auto;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
@@ -594,6 +595,7 @@
         th, td {
             padding: 15px;
             text-align: left;
+            white-space: nowrap;
         }
 
         tbody tr {
@@ -624,6 +626,45 @@
             background: var(--danger);
             color: var(--white);
         }
+        
+        /* Estilos para o Fechamento de Caixa */
+        .closing-report {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        .closing-report h3 {
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 16px;
+        }
+        .report-item:last-child {
+            border-bottom: none;
+        }
+        .report-item span:first-child {
+            font-weight: 500;
+            color: #374151;
+        }
+        .report-item span:last-child {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        .report-item.total {
+            font-size: 20px;
+            font-weight: bold;
+            padding-top: 15px;
+            margin-top: 10px;
+            border-top: 2px solid #d1d5db;
+        }
+
 
         .hidden {
             display: none !important;
@@ -670,7 +711,7 @@
                 font-size: 20px;
             }
 
-            .pdv-left, .pdv-right {
+            .pdv-left, .pdv-right, .admin-panel {
                 padding: 15px; /* Reduz o espaçamento interno */
             }
 
@@ -846,6 +887,7 @@
                     <button class="admin-tab active" onclick="switchTab(event, 'products')">Produtos</button>
                     <button class="admin-tab" onclick="switchTab(event, 'operators')">Operadores</button>
                     <button class="admin-tab" onclick="switchTab(event, 'sales')">Vendas</button>
+                    <button class="admin-tab" onclick="switchTab(event, 'closing')">Fechamento de Caixa</button>
                     <button class="admin-tab" onclick="switchTab(event, 'config')">Configurações</button>
                 </div>
 
@@ -898,6 +940,14 @@
                             </thead>
                             <tbody id="salesTableBody"></tbody>
                         </table>
+                    </div>
+                </div>
+                
+                <div class="admin-content" id="tabClosing">
+                    <h3 style="margin-bottom: 20px;">Fechamento de Caixa Diário</h3>
+                    <button class="btn btn-primary" onclick="generateDailyClosing()" style="width: auto;">Gerar Relatório do Dia</button>
+                    <div id="dailyClosingResult">
+                        <p style="margin-top: 20px; color: #6b7280;">Clique no botão acima para gerar o relatório de vendas de hoje.</p>
                     </div>
                 </div>
 
@@ -1376,8 +1426,10 @@
             document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
             
             event.target.classList.add('active');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            let tabContentId = 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+            document.getElementById(tabContentId).classList.add('active');
         }
+
 
         async function loadAdminData() {
             await renderProductsTable();
@@ -1437,6 +1489,80 @@
                 </tr>
             `).join('');
         }
+        
+        // --- FECHAMENTO DE CAIXA ---
+        async function generateDailyClosing() {
+            const resultDiv = document.getElementById('dailyClosingResult');
+            resultDiv.innerHTML = '<p>Calculando...</p>';
+
+            const today = new Date();
+            const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0).toISOString();
+            const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString();
+
+            const { data: sales, error } = await supabaseClient
+                .from('sales')
+                .select('*')
+                .eq('market_id', currentUser.market_id)
+                .gte('created_at', startOfDay)
+                .lte('created_at', endOfDay);
+                
+            if (error) {
+                console.error("Erro ao buscar vendas do dia:", error);
+                resultDiv.innerHTML = '<p style="color: var(--danger);">Erro ao carregar o relatório.</p>';
+                return;
+            }
+            
+            if (sales.length === 0) {
+                 resultDiv.innerHTML = '<p style="margin-top: 20px; color: #6b7280;">Nenhuma venda registrada hoje.</p>';
+                 return;
+            }
+
+            const report = {
+                totalValue: 0,
+                transactionCount: sales.length,
+                payments: { money: 0, debit: 0, credit: 0, pix: 0 }
+            };
+
+            for (const sale of sales) {
+                report.totalValue += sale.total;
+                if (report.payments.hasOwnProperty(sale.payment)) {
+                    report.payments[sale.payment] += sale.total;
+                }
+            }
+            
+            const reportHTML = `
+                <div class="closing-report">
+                    <h3>Relatório de ${today.toLocaleDateString('pt-BR')}</h3>
+                    <div class="report-item total">
+                        <span>💰 VALOR TOTAL</span>
+                        <span>R$ ${report.totalValue.toFixed(2)}</span>
+                    </div>
+                    <div class="report-item">
+                        <span>#️⃣ Total de Transações</span>
+                        <span>${report.transactionCount}</span>
+                    </div>
+                    <h4 style="margin-top: 25px; margin-bottom: 10px; color: #374151;">Detalhes por Pagamento:</h4>
+                    <div class="report-item">
+                        <span>💵 Dinheiro</span>
+                        <span>R$ ${report.payments.money.toFixed(2)}</span>
+                    </div>
+                    <div class="report-item">
+                        <span>💳 Débito</span>
+                        <span>R$ ${report.payments.debit.toFixed(2)}</span>
+                    </div>
+                    <div class="report-item">
+                        <span>💳 Crédito</span>
+                        <span>R$ ${report.payments.credit.toFixed(2)}</span>
+                    </div>
+                    <div class="report-item">
+                        <span>📱 PIX</span>
+                        <span>R$ ${report.payments.pix.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+            resultDiv.innerHTML = reportHTML;
+        }
+
 
         function loadConfigData() {
             if (marketData) {
@@ -1548,6 +1674,54 @@
         }
     </script>
     <script>
-        // </script>
+        // --- Lógica do Service Worker para PWA ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swContent = `
+                    const CACHE_NAME = 'pdv-supermercado-cache-v1';
+                    const URLS_TO_CACHE = [
+                        './' 
+                    ];
+
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME)
+                                .then(cache => {
+                                    console.log('Cache aberto');
+                                    return cache.addAll(URLS_TO_CACHE);
+                                })
+                        );
+                    });
+
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then(response => {
+                                    if (response) {
+                                        return response;
+                                    }
+                                    return fetch(event.request);
+                                }
+                            )
+                        );
+                    });
+                `;
+                
+                // Cria um Blob a partir do conteúdo do script
+                const swBlob = new Blob([swContent], { type: 'application/javascript' });
+                // Cria uma URL para o Blob
+                const swUrl = URL.createObjectURL(swBlob);
+
+                // Registra o Service Worker usando a URL do Blob
+                navigator.serviceWorker.register(swUrl)
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Falha ao registrar Service Worker:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>

@@ -951,7 +951,7 @@
                 logo: document.getElementById('regLogo').value || ''
             };
 
-            const { data, error } = await supabase.from('markets').insert([newMarket]).select();
+            const { data, error } = await supabaseClient.from('markets').insert([newMarket]).select();
 
             if (error) {
                 console.error('Erro ao cadastrar mercado:', error);
@@ -993,7 +993,7 @@
             const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
             const codeSearch = document.getElementById('productCode').value;
             
-            let query = supabase.from('products').select('*').eq('market_id', currentUser.market_id);
+            let query = supabaseClient.from('products').select('*').eq('market_id', currentUser.market_id);
             
             if (searchTerm) {
                  query = query.or(`name.ilike.%${searchTerm}%,code.ilike.%${searchTerm}%`);
@@ -1313,7 +1313,7 @@
         }
 
         async function renderProductsTable() {
-            const { data: products, error } = await supabase.from('products').select('*').eq('market_id', currentUser.market_id);
+            const { data: products, error } = await supabaseClient.from('products').select('*').eq('market_id', currentUser.market_id);
             if (error) { console.error(error); return; }
             const tbody = document.getElementById('productsTableBody');
             tbody.innerHTML = products.map(p => `
@@ -1331,7 +1331,7 @@
         }
 
         async function renderOperatorsTable() {
-            const { data: operators, error } = await supabase.from('operators').select('*').eq('market_id', currentUser.market_id);
+            const { data: operators, error } = await supabaseClient.from('operators').select('*').eq('market_id', currentUser.market_id);
             if (error) { console.error(error); return; }
             const tbody = document.getElementById('operatorsTableBody');
             tbody.innerHTML = operators.map(op => `
@@ -1348,7 +1348,7 @@
         }
 
         async function renderSalesTable() {
-            const { data: sales, error } = await supabase.from('sales').select('*').eq('market_id', currentUser.market_id).order('created_at', { ascending: false });
+            const { data: sales, error } = await supabaseClient.from('sales').select('*').eq('market_id', currentUser.market_id).order('created_at', { ascending: false });
             if (error) { console.error(error); return; }
             const tbody = document.getElementById('salesTableBody');
             tbody.innerHTML = sales.map(s => `
@@ -1383,7 +1383,7 @@
                 phone: document.getElementById('cfgPhone').value,
                 logo: document.getElementById('cfgLogo').value
             };
-            const { data, error } = await supabase.from('markets').update(updatedMarket).eq('id', currentUser.market_id).select().single();
+            const { data, error } = await supabaseClient.from('markets').update(updatedMarket).eq('id', currentUser.market_id).select().single();
             if (error) {
                 console.error(error);
                 alert("Erro ao salvar configurações.");
@@ -1404,13 +1404,13 @@
             const stock = parseInt(prompt('Estoque:'));
             if (isNaN(stock)) return;
             
-            const { error } = await supabase.from('products').insert([{ name, code, price, stock, market_id: currentUser.market_id }]);
+            const { error } = await supabaseClient.from('products').insert([{ name, code, price, stock, market_id: currentUser.market_id }]);
             if (error) { console.error(error); alert("Erro ao adicionar produto."); }
             else { await renderProductsTable(); await renderProducts(); }
         }
 
         async function editProduct(id) {
-            const { data: product, error: fetchError } = await supabase.from('products').select('*').eq('id', id).single();
+            const { data: product, error: fetchError } = await supabaseClient.from('products').select('*').eq('id', id).single();
             if (fetchError || !product) { alert("Produto não encontrado."); return; }
             
             const name = prompt('Nome do produto:', product.name);
@@ -1420,14 +1420,14 @@
             const stock = parseInt(prompt('Estoque:', product.stock));
             if (isNaN(stock)) return;
             
-            const { error } = await supabase.from('products').update({ name, price, stock }).eq('id', id);
+            const { error } = await supabaseClient.from('products').update({ name, price, stock }).eq('id', id);
             if (error) { console.error(error); alert("Erro ao editar produto."); }
             else { await renderProductsTable(); await renderProducts(); }
         }
 
         async function deleteProduct(id) {
             if (!confirm('Deseja realmente excluir este produto?')) return;
-            const { error } = await supabase.from('products').delete().eq('id', id);
+            const { error } = await supabaseClient.from('products').delete().eq('id', id);
             if (error) { console.error(error); alert("Erro ao excluir produto."); }
             else { await renderProductsTable(); await renderProducts(); }
         }
@@ -1441,13 +1441,13 @@
             const password = prompt('Senha:');
             if (!password) return;
             
-            const { error } = await supabase.from('operators').insert([{ name, email, password, active: true, market_id: currentUser.market_id }]);
+            const { error } = await supabaseClient.from('operators').insert([{ name, email, password, active: true, market_id: currentUser.market_id }]);
             if (error) { console.error(error); alert("Erro ao adicionar operador."); }
             else { await renderOperatorsTable(); }
         }
 
         async function editOperator(id) {
-            const { data: operator, error: fetchError } = await supabase.from('operators').select('*').eq('id', id).single();
+            const { data: operator, error: fetchError } = await supabaseClient.from('operators').select('*').eq('id', id).single();
             if (fetchError || !operator) { alert("Operador não encontrado."); return; }
             
             const name = prompt('Nome do operador:', operator.name);
@@ -1455,25 +1455,26 @@
             const email = prompt('E-mail:', operator.email);
             if (!email) return;
             
-            const { error } = await supabase.from('operators').update({ name, email }).eq('id', id);
+            const { error } = await supabaseClient.from('operators').update({ name, email }).eq('id', id);
             if (error) { console.error(error); alert("Erro ao editar operador."); }
             else { await renderOperatorsTable(); }
         }
 
         async function deleteOperator(id) {
             if (!confirm('Deseja realmente excluir este operador?')) return;
-            const { error } = await supabase.from('operators').delete().eq('id', id);
+            const { error } = await supabaseClient.from('operators').delete().eq('id', id);
             if (error) { console.error(error); alert("Erro ao excluir operador."); }
             else { await renderOperatorsTable(); }
         }
 
         async function viewSale(id) {
-            const { data: sale, error } = await supabase.from('sales').select('*').eq('id', id).single();
+            const { data: sale, error } = await supabaseClient.from('sales').select('*').eq('id', id).single();
             if (error) { console.error(error); alert("Venda não encontrada."); }
             else { showCupom(sale); }
         }
     </script>
 </body>
 </html>
+
 
 

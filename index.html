@@ -7,28 +7,7 @@
 
     <meta name="theme-color" content="#2563eb"/>
     <meta name="description" content="Sistema de Ponto de Venda para Supermercados"/>
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="icon" href="icon-192.png" type="image/png">
-    "name": "Sistema PDV Supermercado",
-    "short_name": "PDV",
-    "description": "Sistema de Ponto de Venda para Supermercados",
-    "start_url": ".",
-    "display": "standalone",
-    "background_color": "#ffffff",
-    "theme_color": "#2563eb",
-    "icons": [
-        {
-            "src": "icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        }
-    ]
-}'>
+    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAAaklEQVR42u3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOA1v9QAATX6i/GAAAAAElFTkSuQmCC">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -198,6 +177,7 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
             display: none;
+            width: 100%;
         }
 
         .pdv-header {
@@ -246,7 +226,7 @@
             display: grid;
             grid-template-columns: 1fr 400px;
             gap: 0;
-            height: calc(100vh - 200px);
+            height: calc(100vh - 120px);
         }
 
         .pdv-left {
@@ -298,12 +278,18 @@
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
+            position: relative;
         }
 
         .product-card:hover {
             border-color: var(--primary);
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .product-card:active {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.15);
         }
 
         .product-card h4 {
@@ -317,6 +303,12 @@
             font-size: 18px;
             font-weight: bold;
             color: var(--secondary);
+        }
+
+        .product-card .stock-info {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
         }
 
         .cart-section h3 {
@@ -449,6 +441,36 @@
             border-color: var(--primary);
         }
 
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--secondary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
         /* Modal Cupom */
         .modal {
             display: none;
@@ -547,6 +569,7 @@
             gap: 10px;
             margin-bottom: 30px;
             border-bottom: 2px solid var(--light);
+            flex-wrap: wrap;
         }
 
         .admin-tab {
@@ -576,7 +599,7 @@
         .table-container {
             background: var(--white);
             border-radius: 12px;
-            overflow: hidden;
+            overflow-x: auto;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
@@ -593,6 +616,7 @@
         th, td {
             padding: 15px;
             text-align: left;
+            white-space: nowrap;
         }
 
         tbody tr {
@@ -623,35 +647,122 @@
             background: var(--danger);
             color: var(--white);
         }
+        
+        .closing-report {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        .closing-report h3 {
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 16px;
+        }
+        .report-item:last-child {
+            border-bottom: none;
+        }
+        .report-item span:first-child {
+            font-weight: 500;
+            color: #374151;
+        }
+        .report-item span:last-child {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        .report-item.total {
+            font-size: 20px;
+            font-weight: bold;
+            padding-top: 15px;
+            margin-top: 10px;
+            border-top: 2px solid #d1d5db;
+        }
 
-        @media (max-width: 1200px) {
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsivo */
+        @media (max-width: 1024px) {
             .pdv-body {
                 grid-template-columns: 1fr;
+                height: auto;
+                overflow-y: auto;
             }
 
             .pdv-right {
                 border-top: 2px solid #e5e7eb;
                 border-right: none;
             }
+
+            .container {
+                padding: 0;
+            }
+
+            .pdv-container, .auth-container {
+                border-radius: 0;
+                min-height: 100vh;
+            }
         }
 
         @media (max-width: 768px) {
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            }
-
-            .payment-methods {
-                grid-template-columns: 1fr;
+            .container {
+                padding: 0;
             }
 
             .pdv-header {
                 flex-direction: column;
                 align-items: flex-start;
+                padding: 15px;
             }
-        }
 
-        .hidden {
-            display: none !important;
+            .pdv-header h1 {
+                font-size: 20px;
+            }
+
+            .pdv-left, .pdv-right, .admin-panel {
+                padding: 15px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .product-card {
+                padding: 10px;
+            }
+
+            .product-card h4 {
+                font-size: 13px;
+                min-height: 36px;
+            }
+            
+            .product-card .price {
+                font-size: 16px;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .auth-body {
+                padding: 20px;
+            }
+
+            .toast {
+                bottom: 20px;
+                right: 20px;
+                left: 20px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -798,6 +909,7 @@
                     <button class="admin-tab active" onclick="switchTab(event, 'products')">Produtos</button>
                     <button class="admin-tab" onclick="switchTab(event, 'operators')">Operadores</button>
                     <button class="admin-tab" onclick="switchTab(event, 'sales')">Vendas</button>
+                    <button class="admin-tab" onclick="switchTab(event, 'closing')">Fechamento de Caixa</button>
                     <button class="admin-tab" onclick="switchTab(event, 'config')">Configurações</button>
                 </div>
 
@@ -811,23 +923,6 @@
                                     <th>Nome</th>
                                     <th>Preço</th>
                                     <th>Estoque</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="productsTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="admin-content" id="tabOperators">
-                    <button class="btn btn-primary" onclick="addOperator()" style="margin-bottom: 20px; width: auto;">+ Adicionar Operador</button>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>E-mail</th>
-                                    <th>Status</th>
                                     <th>Ações</th>
                                 </tr>
                             </thead>
@@ -850,6 +945,14 @@
                             </thead>
                             <tbody id="salesTableBody"></tbody>
                         </table>
+                    </div>
+                </div>
+                
+                <div class="admin-content" id="tabClosing">
+                    <h3 style="margin-bottom: 20px;">Fechamento de Caixa Diário</h3>
+                    <button class="btn btn-primary" onclick="generateDailyClosing()" style="width: auto;">Gerar Relatório do Dia</button>
+                    <div id="dailyClosingResult">
+                        <p style="margin-top: 20px; color: #6b7280;">Clique no botão acima para gerar o relatório de vendas de hoje.</p>
                     </div>
                 </div>
 
@@ -895,19 +998,32 @@
         </div>
     </div>
 
+    <div class="toast" id="toast"></div>
+
     <script>
-        // --- Configuração do Supabase ---
+        // Configuração do Supabase
         const SUPABASE_URL = 'https://eymchtbskyhqghjwclkb.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bWNodGJza3locWdoandjbGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3Njk0NjUsImV4cCI6MjA3NTM0NTQ2NX0.eYzu0GHVcezfDZRq8-Eig1G-feXVOPBLU-566jVwfcs';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- Variáveis de Estado Global ---
+        // Variáveis globais
         let currentUser = null;
         let marketData = null;
         let cart = [];
         let selectedPayment = 'money';
+        let productsCache = []; // Cache local de produtos
 
-        // --- Funções de Navegação ---
+        // Toast notification
+        function showToast(message, duration = 2000) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // Navegação
         function showLoginScreen() {
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
@@ -918,7 +1034,7 @@
             document.getElementById('registerScreen').classList.remove('hidden');
         }
 
-        // --- Autenticação ---
+        // Autenticação
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
@@ -935,14 +1051,14 @@
 
                     if (error || !data) throw new Error('Dono não encontrado.');
                     
-                    if (data.password === password) { // Simplificado. Use autenticação do Supabase (Auth) para segurança.
+                    if (data.password === password) {
                         marketData = data;
                         currentUser = { type: 'owner', name: marketData.name, email: email, market_id: marketData.id };
                         await showPDV();
                     } else {
                         alert('E-mail ou senha incorretos!');
                     }
-                } else { // Operator
+                } else {
                     const { data: operator, error } = await supabaseClient
                         .from('operators')
                         .select('*, markets(*)')
@@ -951,7 +1067,7 @@
 
                     if (error || !operator) throw new Error('Operador não encontrado.');
                     
-                    if (operator.password === password) { // Simplificado.
+                    if (operator.password === password) {
                         marketData = operator.markets;
                         currentUser = { type: 'operator', name: operator.name, email: email, market_id: marketData.id };
                         await showPDV();
@@ -973,7 +1089,7 @@
                 address: document.getElementById('regAddress').value,
                 phone: document.getElementById('regPhone').value,
                 email: document.getElementById('regEmail').value,
-                password: document.getElementById('regPassword').value, // ATENÇÃO: Nunca armazene senhas em texto plano em produção!
+                password: document.getElementById('regPassword').value,
                 logo: document.getElementById('regLogo').value || ''
             };
 
@@ -989,7 +1105,7 @@
             }
         });
 
-        // --- Lógica do PDV ---
+        // PDV
         async function showPDV() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
@@ -1001,46 +1117,68 @@
                 document.getElementById('adminBtn').style.display = 'none';
             }
             
-            await renderProducts();
+            await loadProducts();
             renderCart();
         }
 
         function logout() {
             currentUser = null;
             marketData = null;
+            productsCache = [];
             document.getElementById('pdvScreen').style.display = 'none';
             document.getElementById('adminPanel').style.display = 'none';
             showLoginScreen();
             clearCart();
         }
 
-        async function renderProducts() {
+        async function loadProducts() {
+            try {
+                const { data: products, error } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('market_id', currentUser.market_id)
+                    .order('name');
+
+                if (error) throw error;
+                
+                productsCache = products || [];
+                renderProducts();
+            } catch (error) {
+                console.error("Erro ao carregar produtos:", error);
+                showToast("Erro ao carregar produtos");
+            }
+        }
+
+        function renderProducts() {
             const grid = document.getElementById('productsGrid');
             const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
-            const codeSearch = document.getElementById('productCode').value;
+            const codeSearch = document.getElementById('productCode').value.toLowerCase();
             
-            let query = supabaseClient.from('products').select('*').eq('market_id', currentUser.market_id);
+            let filteredProducts = productsCache;
             
             if (searchTerm) {
-                 query = query.or(`name.ilike.%${searchTerm}%,code.ilike.%${searchTerm}%`);
-            }
-            if (codeSearch) {
-                query = query.ilike('code', `%${codeSearch}%`);
+                filteredProducts = filteredProducts.filter(p => 
+                    p.name.toLowerCase().includes(searchTerm) || 
+                    p.code.toLowerCase().includes(searchTerm)
+                );
             }
             
-            const { data: products, error } = await query;
-
-            if (error) {
-                console.error("Erro ao buscar produtos:", error);
-                grid.innerHTML = "<p>Erro ao carregar produtos.</p>";
+            if (codeSearch) {
+                filteredProducts = filteredProducts.filter(p => 
+                    p.code.toLowerCase().includes(codeSearch)
+                );
+            }
+            
+            if (filteredProducts.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #6b7280;">Nenhum produto encontrado</p>';
                 return;
             }
             
-            grid.innerHTML = products.map(p => `
-                <div class="product-card" onclick="addToCart(${p.id})">
+            grid.innerHTML = filteredProducts.map(p => `
+                <div class="product-card" onclick="addToCart(${p.id})" data-product-id="${p.id}">
                     <h4>${p.name}</h4>
                     <div class="price">R$ ${p.price.toFixed(2)}</div>
-                    <small style="color: #6b7280;">Estoque: ${p.stock}</small>
+                    <div class="stock-info">Estoque: ${p.stock}</div>
                 </div>
             `).join('');
         }
@@ -1048,33 +1186,32 @@
         document.getElementById('searchProduct').addEventListener('input', renderProducts);
         document.getElementById('productCode').addEventListener('input', renderProducts);
 
-        async function addToCart(productId) {
-            const { data: product, error } = await supabaseClient
-                .from('products')
-                .select('*')
-                .eq('id', productId)
-                .single();
-
-            if (error || !product) {
-                alert('Produto não encontrado!');
+        function addToCart(productId) {
+            const product = productsCache.find(p => p.id === productId);
+            
+            if (!product) {
+                showToast("Produto não encontrado!");
                 return;
             }
             
             if (product.stock <= 0) {
-                alert('Produto sem estoque!');
+                showToast("Produto sem estoque!");
                 return;
             }
             
             const cartItem = cart.find(item => item.id === productId);
+            
             if (cartItem) {
                 if (cartItem.qty >= product.stock) {
-                    alert('Quantidade máxima em estoque atingida!');
+                    showToast("Quantidade máxima em estoque atingida!");
                     return;
                 }
                 cartItem.qty++;
             } else {
                 cart.push({...product, qty: 1});
             }
+            
+            showToast(`${product.name} adicionado ao carrinho`);
             renderCart();
         }
 
@@ -1101,31 +1238,23 @@
             updateTotals();
         }
 
-        async function updateQty(productId, change) {
+        function updateQty(productId, change) {
             const cartItem = cart.find(item => item.id === productId);
             if (!cartItem) return;
 
-            const { data: product, error } = await supabaseClient
-                .from('products')
-                .select('stock')
-                .eq('id', productId)
-                .single();
-
-            if (error || !product) {
-                 alert('Erro ao verificar estoque do produto.');
-                 return;
+            const product = productsCache.find(p => p.id === productId);
+            if (!product) return;
+            
+            cartItem.qty += change;
+            
+            if (cartItem.qty <= 0) {
+                removeFromCart(productId);
+            } else if (cartItem.qty > product.stock) {
+                cartItem.qty = product.stock;
+                showToast("Quantidade máxima em estoque atingida!");
             }
             
-            if (cartItem) {
-                cartItem.qty += change;
-                if (cartItem.qty <= 0) {
-                    removeFromCart(productId);
-                } else if (cartItem.qty > product.stock) {
-                    cartItem.qty = product.stock;
-                    alert('Quantidade máxima em estoque atingida!');
-                }
-                renderCart();
-            }
+            renderCart();
         }
 
         function removeFromCart(productId) {
@@ -1136,6 +1265,8 @@
         function clearCart() {
             if (cart.length > 0 && !confirm('Deseja realmente limpar o carrinho?')) return;
             cart = [];
+            document.getElementById('receivedValue').value = '';
+            document.getElementById('changeValue').value = '';
             renderCart();
         }
 
@@ -1182,14 +1313,20 @@
                         .from('products')
                         .update({ stock: newStock })
                         .eq('id', item.id);
-                    if (error) throw new Error(`Falha ao atualizar estoque do produto ${item.name}: ${error.message}`);
+                    
+                    if (error) throw new Error(`Falha ao atualizar estoque: ${error.message}`);
+                    
+                    // Atualizar cache local
+                    const cachedProduct = productsCache.find(p => p.id === item.id);
+                    if (cachedProduct) {
+                        cachedProduct.stock = newStock;
+                    }
                 }
                 
                 // Salvar venda
                 const saleData = {
-                    date: new Date().toLocaleString('pt-BR'),
                     operator: currentUser.name,
-                    items: cart, // Armazenando um JSON com os itens
+                    items: cart,
                     total: total,
                     payment: selectedPayment,
                     received: received,
@@ -1203,23 +1340,24 @@
                     .select()
                     .single();
 
-                if (saleError) throw new Error(`Falha ao registrar a venda: ${saleError.message}`);
+                if (saleError) throw new Error(`Falha ao registrar venda: ${saleError.message}`);
 
+                showToast("Venda finalizada com sucesso!");
                 showCupom(newSale);
                 
                 cart = [];
                 document.getElementById('receivedValue').value = '';
                 document.getElementById('changeValue').value = '';
                 renderCart();
-                await renderProducts();
+                renderProducts();
 
             } catch (error) {
                 console.error("Erro ao finalizar venda:", error);
-                alert("Ocorreu um erro. A venda não foi finalizada. Verifique sua conexão e o estoque dos produtos.");
+                alert("Ocorreu um erro. A venda não foi finalizada.");
             }
         }
 
-        // --- Cupom Fiscal ---
+        // Cupom Fiscal
         function showCupom(sale) {
             const paymentNames = {
                 money: 'DINHEIRO',
@@ -1303,7 +1441,7 @@
             window.print();
         }
 
-        // --- Painel Administrativo ---
+        // Painel Administrativo
         async function toggleAdmin() {
             if (currentUser?.type !== 'owner') {
                 alert('Acesso negado! Apenas o dono pode acessar o painel administrativo.');
@@ -1316,6 +1454,7 @@
             if (admin.style.display === 'block') {
                 admin.style.display = 'none';
                 pdv.style.display = 'block';
+                await loadProducts(); // Recarrega produtos ao voltar ao PDV
             } else {
                 pdv.style.display = 'none';
                 admin.style.display = 'block';
@@ -1328,7 +1467,8 @@
             document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
             
             event.target.classList.add('active');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            let tabContentId = 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+            document.getElementById(tabContentId).classList.add('active');
         }
 
         async function loadAdminData() {
@@ -1339,7 +1479,7 @@
         }
 
         async function renderProductsTable() {
-            const { data: products, error } = await supabaseClient.from('products').select('*').eq('market_id', currentUser.market_id);
+            const { data: products, error } = await supabaseClient.from('products').select('*').eq('market_id', currentUser.market_id).order('name');
             if (error) { console.error(error); return; }
             const tbody = document.getElementById('productsTableBody');
             tbody.innerHTML = products.map(p => `
@@ -1389,6 +1529,78 @@
                 </tr>
             `).join('');
         }
+        
+        async function generateDailyClosing() {
+            const resultDiv = document.getElementById('dailyClosingResult');
+            resultDiv.innerHTML = '<p>Calculando...</p>';
+
+            const today = new Date();
+            const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0).toISOString();
+            const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString();
+
+            const { data: sales, error } = await supabaseClient
+                .from('sales')
+                .select('*')
+                .eq('market_id', currentUser.market_id)
+                .gte('created_at', startOfDay)
+                .lte('created_at', endOfDay);
+                
+            if (error) {
+                console.error("Erro ao buscar vendas do dia:", error);
+                resultDiv.innerHTML = '<p style="color: var(--danger);">Erro ao carregar o relatório.</p>';
+                return;
+            }
+            
+            if (sales.length === 0) {
+                 resultDiv.innerHTML = '<p style="margin-top: 20px; color: #6b7280;">Nenhuma venda registrada hoje.</p>';
+                 return;
+            }
+
+            const report = {
+                totalValue: 0,
+                transactionCount: sales.length,
+                payments: { money: 0, debit: 0, credit: 0, pix: 0 }
+            };
+
+            for (const sale of sales) {
+                report.totalValue += sale.total;
+                if (report.payments.hasOwnProperty(sale.payment)) {
+                    report.payments[sale.payment] += sale.total;
+                }
+            }
+            
+            const reportHTML = `
+                <div class="closing-report">
+                    <h3>Relatório de ${today.toLocaleDateString('pt-BR')}</h3>
+                    <div class="report-item total">
+                        <span>💰 VALOR TOTAL</span>
+                        <span>R$ ${report.totalValue.toFixed(2)}</span>
+                    </div>
+                    <div class="report-item">
+                        <span>#️⃣ Total de Transações</span>
+                        <span>${report.transactionCount}</span>
+                    </div>
+                    <h4 style="margin-top: 25px; margin-bottom: 10px; color: #374151;">Detalhes por Pagamento:</h4>
+                    <div class="report-item">
+                        <span>💵 Dinheiro</span>
+                        <span>R$ ${report.payments.money.toFixed(2)}</span>
+                    </div>
+                    <div class="report-item">
+                        <span>💳 Débito</span>
+                        <span>R$ ${report.payments.debit.toFixed(2)}</span>
+                    </div>
+                    <div class="report-item">
+                        <span>💳 Crédito</span>
+                        <span>R$ ${report.payments.credit.toFixed(2)}</span>
+                    </div>
+                    <div class="report-item">
+                        <span>📱 PIX</span>
+                        <span>R$ ${report.payments.pix.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+            resultDiv.innerHTML = reportHTML;
+        }
 
         function loadConfigData() {
             if (marketData) {
@@ -1414,12 +1626,12 @@
                 console.error(error);
                 alert("Erro ao salvar configurações.");
             } else {
-                marketData = data; // Atualiza os dados locais
-                alert('Configurações salvas com sucesso!');
+                marketData = data;
+                showToast("Configurações salvas com sucesso!");
             }
         });
 
-        // --- CRUD Produtos (Admin) ---
+        // CRUD Produtos
         async function addProduct() {
             const name = prompt('Nome do produto:');
             if (!name) return;
@@ -1432,7 +1644,11 @@
             
             const { error } = await supabaseClient.from('products').insert([{ name, code, price, stock, market_id: currentUser.market_id }]);
             if (error) { console.error(error); alert("Erro ao adicionar produto."); }
-            else { await renderProductsTable(); await renderProducts(); }
+            else { 
+                showToast("Produto adicionado com sucesso!");
+                await renderProductsTable();
+                await loadProducts();
+            }
         }
 
         async function editProduct(id) {
@@ -1448,17 +1664,25 @@
             
             const { error } = await supabaseClient.from('products').update({ name, price, stock }).eq('id', id);
             if (error) { console.error(error); alert("Erro ao editar produto."); }
-            else { await renderProductsTable(); await renderProducts(); }
+            else { 
+                showToast("Produto editado com sucesso!");
+                await renderProductsTable();
+                await loadProducts();
+            }
         }
 
         async function deleteProduct(id) {
             if (!confirm('Deseja realmente excluir este produto?')) return;
             const { error } = await supabaseClient.from('products').delete().eq('id', id);
             if (error) { console.error(error); alert("Erro ao excluir produto."); }
-            else { await renderProductsTable(); await renderProducts(); }
+            else { 
+                showToast("Produto excluído com sucesso!");
+                await renderProductsTable();
+                await loadProducts();
+            }
         }
 
-        // --- CRUD Operadores (Admin) ---
+        // CRUD Operadores
         async function addOperator() {
             const name = prompt('Nome do operador:');
             if (!name) return;
@@ -1469,7 +1693,10 @@
             
             const { error } = await supabaseClient.from('operators').insert([{ name, email, password, active: true, market_id: currentUser.market_id }]);
             if (error) { console.error(error); alert("Erro ao adicionar operador."); }
-            else { await renderOperatorsTable(); }
+            else { 
+                showToast("Operador adicionado com sucesso!");
+                await renderOperatorsTable();
+            }
         }
 
         async function editOperator(id) {
@@ -1483,14 +1710,20 @@
             
             const { error } = await supabaseClient.from('operators').update({ name, email }).eq('id', id);
             if (error) { console.error(error); alert("Erro ao editar operador."); }
-            else { await renderOperatorsTable(); }
+            else { 
+                showToast("Operador editado com sucesso!");
+                await renderOperatorsTable();
+            }
         }
 
         async function deleteOperator(id) {
             if (!confirm('Deseja realmente excluir este operador?')) return;
             const { error } = await supabaseClient.from('operators').delete().eq('id', id);
             if (error) { console.error(error); alert("Erro ao excluir operador."); }
-            else { await renderOperatorsTable(); }
+            else { 
+                showToast("Operador excluído com sucesso!");
+                await renderOperatorsTable();
+            }
         }
 
         async function viewSale(id) {
@@ -1498,9 +1731,59 @@
             if (error) { console.error(error); alert("Venda não encontrada."); }
             else { showCupom(sale); }
         }
+
+        // Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('data:application/javascript;base64,' + btoa(`
+                    const CACHE_NAME = 'pdv-v1';
+                    
+                    self.addEventListener('install', (event) => {
+                        self.skipWaiting();
+                    });
+                    
+                    self.addEventListener('activate', (event) => {
+                        event.waitUntil(self.clients.claim());
+                    });
+                    
+                    self.addEventListener('fetch', (event) => {
+                        event.respondWith(
+                            fetch(event.request).catch(() => {
+                                return new Response('Offline - Conecte-se à internet', {
+                                    headers: { 'Content-Type': 'text/plain' }
+                                });
+                            })
+                        );
+                    });
+                `))
+                .then(() => console.log('Service Worker registrado'))
+                .catch(err => console.log('Erro no Service Worker:', err));
+            });
+        }
+
+        // Suporte para instalação do PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
     </script>
-    <script>
-        // </script>
 </body>
 </html>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
 
+                <div class="admin-content" id="tabOperators">
+                    <button class="btn btn-primary" onclick="addOperator()" style="margin-bottom: 20px; width: auto;">+ Adicionar Operador</button>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>E-mail</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>

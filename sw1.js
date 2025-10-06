@@ -1,3 +1,4 @@
+navigator.serviceWorker.register('/sw.js');
 const CACHE_NAME = 'pdv-v1';
 const urlsToCache = ['/', '/index.html'];
 

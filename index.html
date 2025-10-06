@@ -198,6 +198,7 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
             display: none;
+            width: 100%;
         }
 
         .pdv-header {
@@ -246,7 +247,7 @@
             display: grid;
             grid-template-columns: 1fr 400px;
             gap: 0;
-            height: calc(100vh - 200px);
+            height: calc(100vh - 120px); /* Ajuste de altura para caber melhor na tela */
         }
 
         .pdv-left {
@@ -624,34 +625,81 @@
             color: var(--white);
         }
 
-        @media (max-width: 1200px) {
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- ESTILOS RESPONSIVOS --- */
+
+        /* Para Tablets e Telas Menores */
+        @media (max-width: 1024px) {
             .pdv-body {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr; /* Muda para coluna única */
+                height: auto; /* Altura automática para permitir rolagem */
+                overflow-y: auto;
             }
 
             .pdv-right {
                 border-top: 2px solid #e5e7eb;
                 border-right: none;
             }
-        }
 
-        @media (max-width: 768px) {
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            .container {
+                padding: 0; /* Remove padding lateral em telas menores */
             }
 
-            .payment-methods {
-                grid-template-columns: 1fr;
+            .pdv-container, .auth-container {
+                border-radius: 0; /* Remove bordas arredondadas para ocupar a tela toda */
+                min-height: 100vh;
+            }
+        }
+
+        /* Para Celulares */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0;
             }
 
             .pdv-header {
                 flex-direction: column;
                 align-items: flex-start;
+                padding: 15px;
             }
-        }
 
-        .hidden {
-            display: none !important;
+            .pdv-header h1 {
+                font-size: 20px;
+            }
+
+            .pdv-left, .pdv-right {
+                padding: 15px; /* Reduz o espaçamento interno */
+            }
+
+            .products-grid {
+                /* Garante 2 colunas de produtos no celular */
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .product-card {
+                padding: 10px;
+            }
+
+            .product-card h4 {
+                font-size: 13px;
+                min-height: 36px;
+            }
+            
+            .product-card .price {
+                font-size: 16px;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr 1fr; /* Mantém 2 colunas para pagamentos */
+            }
+
+            .auth-body {
+                padding: 20px;
+            }
         }
     </style>
 </head>

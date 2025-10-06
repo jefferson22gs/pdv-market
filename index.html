@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema PDV - Supermercado</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            padding: 20px;
+        }
+
+        /* Login/Cadastro */
+        .auth-container {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            max-width: 450px;
+            margin: 0 auto;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .auth-header h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .auth-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .auth-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--white);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .link-btn {
+            text-align: center;
+            margin-top: 15px;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .link-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* Sistema PDV */
+        .pdv-container {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: none;
+        }
+
+        .pdv-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--white);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .pdv-header h1 {
+            font-size: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info span {
+            font-size: 14px;
+        }
+
+        .btn-logout {
+            padding: 8px 20px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid var(--white);
+            color: var(--white);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: var(--white);
+            color: var(--primary);
+        }
+
+        .pdv-body {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 0;
+            height: calc(100vh - 200px);
+        }
+
+        .pdv-left {
+            padding: 30px;
+            overflow-y: auto;
+            border-right: 2px solid var(--light);
+        }
+
+        .pdv-right {
+            padding: 30px;
+            background: var(--light);
+            overflow-y: auto;
+        }
+
+        .search-section {
+            margin-bottom: 30px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .product-card {
+            background: var(--white);
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .product-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .product-card h4 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--dark);
+            min-height: 40px;
+        }
+
+        .product-card .price {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .cart-section h3 {
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .cart-items {
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            background: var(--white);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-item-info h4 {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .cart-item-info p {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 5px;
+            background: var(--primary);
+            color: var(--white);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .qty-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .qty-display {
+            width: 40px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .btn-remove {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 5px;
+            background: var(--danger);
+            color: var(--white);
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .cart-total {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cart-total .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .cart-total .total-row.grand-total {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+            padding-top: 10px;
+            border-top: 2px solid var(--light);
+        }
+
+        .payment-section {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .payment-section h4 {
+            margin-bottom: 15px;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .payment-method {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .payment-method:hover {
+            border-color: var(--primary);
+        }
+
+        .payment-method.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        /* Modal Cupom */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 15px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .cupom-fiscal {
+            padding: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .cupom-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #333;
+        }
+
+        .cupom-header h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .cupom-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+        }
+
+        .cupom-total {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed #333;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .cupom-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed #333;
+            font-size: 11px;
+        }
+
+        .modal-actions {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+            padding: 30px;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .admin-tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.3s;
+        }
+
+        .admin-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .admin-content {
+            display: none;
+        }
+
+        .admin-content.active {
+            display: block;
+        }
+
+        .table-container {
+            background: var(--white);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--light);
+        }
+
+        tbody tr:hover {
+            background: var(--light);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: var(--warning);
+            color: var(--white);
+            margin-right: 5px;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: var(--white);
+        }
+
+        @media (max-width: 1200px) {
+            .pdv-body {
+                grid-template-columns: 1fr;
+            }
+
+            .pdv-right {
+                border-top: 2px solid #e5e7eb;
+                border-right: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+
+            .pdv-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Tela de Login -->
+        <div class="auth-container" id="loginScreen">
+            <div class="auth-header">
+                <h2>🛒 Sistema PDV</h2>
+                <p>Faça login para continuar</p>
+            </div>
+            <div class="auth-body">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <input type="email" id="loginEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="loginPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Usuário</label>
+                        <select id="loginType" required>
+                            <option value="owner">Dono do Mercado</option>
+                            <option value="operator">Operador de Caixa</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                </form>
+                <div class="link-btn" onclick="showRegisterScreen()">
+                    Não tem conta? Cadastre-se aqui
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Cadastro -->
+        <div class="auth-container hidden" id="registerScreen">
+            <div class="auth-header">
+                <h2>📝 Cadastro do Mercado</h2>
+                <p>Preencha os dados do seu estabelecimento</p>
+            </div>
+            <div class="auth-body">
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>Nome do Mercado</label>
+                        <input type="text" id="regMarketName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CNPJ</label>
+                        <input type="text" id="regCNPJ" placeholder="00.000.000/0000-00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Endereço Completo</label>
+                        <input type="text" id="regAddress" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="text" id="regPhone" placeholder="(00) 00000-0000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail (Login)</label>
+                        <input type="email" id="regEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="regPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Logo do Mercado (URL)</label>
+                        <input type="text" id="regLogo" placeholder="https://...">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Cadastrar Mercado</button>
+                </form>
+                <div class="link-btn" onclick="showLoginScreen()">
+                    Já tem conta? Faça login
+                </div>
+            </div>
+        </div>
+
+        <!-- Sistema PDV -->
+        <div class="pdv-container" id="pdvScreen">
+            <div class="pdv-header">
+                <h1 id="marketNameDisplay">🛒 Sistema PDV</h1>
+                <div class="user-info">
+                    <span id="userNameDisplay">Usuário</span>
+                    <button class="btn-logout" onclick="logout()">Sair</button>
+                    <button class="btn-logout" id="adminBtn" onclick="toggleAdmin()">Admin</button>
+                </div>
+            </div>
+            <div class="pdv-body">
+                <div class="pdv-left">
+                    <div class="search-section">
+                        <h3>Produtos</h3>
+                        <div class="search-box">
+                            <input type="text" id="searchProduct" placeholder="Buscar produto por código ou nome...">
+                            <input type="number" id="productCode" placeholder="Código" style="max-width: 120px;">
+                        </div>
+                        <div class="products-grid" id="productsGrid"></div>
+                    </div>
+                </div>
+                <div class="pdv-right">
+                    <div class="cart-section">
+                        <h3>Carrinho</h3>
+                        <div class="cart-items" id="cartItems"></div>
+                        <div class="cart-total">
+                            <div class="total-row">
+                                <span>Subtotal:</span>
+                                <span id="subtotal">R$ 0,00</span>
+                            </div>
+                            <div class="total-row grand-total">
+                                <span>TOTAL:</span>
+                                <span id="total">R$ 0,00</span>
+                            </div>
+                        </div>
+                        <div class="payment-section">
+                            <h4>Forma de Pagamento</h4>
+                            <div class="payment-methods">
+                                <div class="payment-method active" data-method="money">💵 Dinheiro</div>
+                                <div class="payment-method" data-method="debit">💳 Débito</div>
+                                <div class="payment-method" data-method="credit">💳 Crédito</div>
+                                <div class="payment-method" data-method="pix">📱 PIX</div>
+                            </div>
+                            <div class="form-group">
+                                <label>Valor Recebido</label>
+                                <input type="number" id="receivedValue" placeholder="0,00" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label>Troco</label>
+                                <input type="text" id="changeValue" readonly style="background: #f3f4f6;">
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="finalizeSale()">Finalizar Venda</button>
+                        <button class="btn btn-danger" onclick="clearCart()">Limpar Carrinho</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel Admin -->
+        <div class="pdv-container admin-panel" id="adminPanel">
+            <div class="pdv-header">
+                <h1>⚙️ Painel Administrativo</h1>
+                <button class="btn-logout" onclick="toggleAdmin()">Voltar ao PDV</button>
+            </div>
+            <div style="padding: 30px;">
+                <div class="admin-tabs">
+                    <button class="admin-tab active" onclick="switchTab('products')">Produtos</button>
+                    <button class="admin-tab" onclick="switchTab('operators')">Operadores</button>
+                    <button class="admin-tab" onclick="switchTab('sales')">Vendas</button>
+                    <button class="admin-tab" onclick="switchTab('config')">Configurações</button>
+                </div>
+
+                <!-- Tab Produtos -->
+                <div class="admin-content active" id="tabProducts">
+                    <button class="btn btn-primary" onclick="addProduct()" style="margin-bottom: 20px; width: auto;">+ Adicionar Produto</button>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nome</th>
+                                    <th>Preço</th>
+                                    <th>Estoque</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab Operadores -->
+                <div class="admin-content" id="tabOperators">
+                    <button class="btn btn-primary" onclick="addOperator()" style="margin-bottom: 20px; width: auto;">+ Adicionar Operador</button>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>E-mail</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="operatorsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab Vendas -->
+                <div class="admin-content" id="tabSales">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Operador</th>
+                                    <th>Total</th>
+                                    <th>Pagamento</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salesTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab Configurações -->
+                <div class="admin-content" id="tabConfig">
+                    <div style="max-width: 600px;">
+                        <h3 style="margin-bottom: 20px;">Dados do Mercado</h3>
+                        <form id="configForm">
+                            <div class="form-group">
+                                <label>Nome do Mercado</label>
+                                <input type="text" id="cfgMarketName">
+                            </div>
+                            <div class="form-group">
+                                <label>CNPJ</label>
+                                <input type="text" id="cfgCNPJ">
+                            </div>
+                            <div class="form-group">
+                                <label>Endereço</label>
+                                <input type="text" id="cfgAddress">
+                            </div>
+                            <div class="form-group">
+                                <label>Telefone</label>
+                                <input type="text" id="cfgPhone">
+                            </div>
+                            <div class="form-group">
+                                <label>Logo (URL)</label>
+                                <input type="text" id="cfgLogo">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: auto;">Salvar Alterações</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cupom Fiscal -->
+    <div class="modal" id="cupomModal">
+        <div class="modal-content">
+            <div class="cupom-fiscal" id="cupomContent"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="printCupom()">🖨️ Imprimir</button>
+                <button class="btn btn-secondary" onclick="closeCupom()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados em memória
+        let currentUser = null;
+        let marketData = null;
+        let products = [];
+        let operators = [];
+        let sales = [];
+        let cart = [];
+        let selectedPayment = 'money';
+
+        // Inicializar dados de exemplo
+        function initData() {
+            products = [
+                {id: 1, code: '7891000100103', name: 'Arroz Branco 5kg', price: 25.90, stock: 50},
+                {id: 2, code: '7891000100110', name: 'Feijão Preto 1kg', price: 8.50, stock: 80},
+                {id: 3, code: '7891000100127', name: 'Açúcar Cristal 1kg', price: 4.20, stock: 100},
+                {id: 4, code: '7891000100134', name: 'Óleo de Soja 900ml', price: 7.90, stock: 60},
+                {id: 5, code: '7891000100141', name: 'Macarrão Espaguete', price: 3.50, stock: 120},
+                {id: 6, code: '7891000100158', name: 'Café Torrado 500g', price: 15.80, stock: 40},
+                {id: 7, code: '7891000100165', name: 'Leite Integral 1L', price: 4.99, stock: 90},
+                {id: 8, code: '7891000100172', name: 'Papel Higiênico 12un', price: 18.90, stock: 35},
+            ];
+        }
+
+        initData();
+
+        // Funções de navegação
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('registerScreen').classList.add('hidden');
+        }
+
+        function showRegisterScreen() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('registerScreen').classList.remove('hidden');
+        }
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const type = document.getElementById('loginType').value;
+
+            if (type === 'owner') {
+                if (!marketData) {
+                    alert('Nenhum mercado cadastrado. Por favor, faça o cadastro primeiro.');
+                    showRegisterScreen();
+                    return;
+                }
+                if (email === marketData.email && password === marketData.password) {
+                    currentUser = {type: 'owner', name: marketData.name, email: email};
+                    showPDV();
+                } else {
+                    alert('E-mail ou senha incorretos!');
+                }
+            } else {
+                const operator = operators.find(op => op.email === email && op.password === password);
+                if (operator) {
+                    currentUser = {type: 'operator', name: operator.name, email: email};
+                    showPDV();
+                } else {
+                    alert('E-mail ou senha incorretos!');
+                }
+            }
+        });
+
+        // Cadastro
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            marketData = {
+                name: document.getElementById('regMarketName').value,
+                cnpj: document.getElementById('regCNPJ').value,
+                address: document.getElementById('regAddress').value,
+                phone: document.getElementById('regPhone').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                logo: document.getElementById('regLogo').value || ''
+            };
+            alert('Mercado cadastrado com sucesso! Faça login para continuar.');
+            showLoginScreen();
+            document.getElementById('registerForm').reset();
+        });
+
+        // Mostrar PDV
+        function showPDV() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('pdvScreen').style.display = 'block';
+            document.getElementById('userNameDisplay').textContent = currentUser.name;
+            document.getElementById('marketNameDisplay').textContent = '🛒 ' + (marketData?.name || 'Sistema PDV');
+            
+            if (currentUser.type === 'operator') {
+                document.getElementById('adminBtn').style.display = 'none';
+            }
+            
+            renderProducts();
+            renderCart();
+        }
+
+        // Logout
+        function logout() {
+            currentUser = null;
+            document.getElementById('pdvScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'none';
+            showLoginScreen();
+            clearCart();
+        }
+
+        // Renderizar produtos
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
+            const codeSearch = document.getElementById('productCode').value;
+            
+            let filtered = products;
+            if (searchTerm) {
+                filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm) || p.code.includes(searchTerm));
+            }
+            if (codeSearch) {
+                filtered = filtered.filter(p => p.code.includes(codeSearch));
+            }
+            
+            grid.innerHTML = filtered.map(p => `
+                <div class="product-card" onclick="addToCart(${p.id})">
+                    <h4>${p.name}</h4>
+                    <div class="price">R$ ${p.price.toFixed(2)}</div>
+                    <small style="color: #6b7280;">Estoque: ${p.stock}</small>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('searchProduct').addEventListener('input', renderProducts);
+        document.getElementById('productCode').addEventListener('input', renderProducts);
+
+        // Adicionar ao carrinho
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            if (product.stock <= 0) {
+                alert('Produto sem estoque!');
+                return;
+            }
+            
+            const cartItem = cart.find(item => item.id === productId);
+            if (cartItem) {
+                if (cartItem.qty >= product.stock) {
+                    alert('Quantidade máxima atingida!');
+                    return;
+                }
+                cartItem.qty++;
+            } else {
+                cart.push({...product, qty: 1});
+            }
+            renderCart();
+        }
+
+        // Renderizar carrinho
+        function renderCart() {
+            const cartDiv = document.getElementById('cartItems');
+            if (cart.length === 0) {
+                cartDiv.innerHTML = '<p style="text-align: center; color: #6b7280;">Carrinho vazio</p>';
+            } else {
+                cartDiv.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <h4>${item.name}</h4>
+                            <p>R$ ${item.price.toFixed(2)} cada</p>
+                        </div>
+                        <div class="cart-item-actions">
+                            <button class="qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
+                            <span class="qty-display">${item.qty}</span>
+                            <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+                            <button class="btn-remove" onclick="removeFromCart(${item.id})">×</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            updateTotals();
+        }
+
+        // Atualizar quantidade
+        function updateQty(productId, change) {
+            const cartItem = cart.find(item => item.id === productId);
+            const product = products.find(p => p.id === productId);
+            
+            if (cartItem) {
+                cartItem.qty += change;
+                if (cartItem.qty <= 0) {
+                    removeFromCart(productId);
+                } else if (cartItem.qty > product.stock) {
+                    cartItem.qty = product.stock;
+                    alert('Quantidade máxima atingida!');
+                }
+                renderCart();
+            }
+        }
+
+        // Remover do carrinho
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            renderCart();
+        }
+
+        // Limpar carrinho
+        function clearCart() {
+            if (cart.length > 0 && !confirm('Deseja realmente limpar o carrinho?')) return;
+            cart = [];
+            renderCart();
+        }
+
+        // Atualizar totais
+        function updateTotals() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            document.getElementById('subtotal').textContent = 'R$ ' + subtotal.toFixed(2);
+            document.getElementById('total').textContent = 'R$ ' + subtotal.toFixed(2);
+        }
+
+        // Métodos de pagamento
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', function() {
+                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+                selectedPayment = this.dataset.method;
+            });
+        });
+
+        // Calcular troco
+        document.getElementById('receivedValue').addEventListener('input', function() {
+            const received = parseFloat(this.value) || 0;
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const change = received - total;
+            document.getElementById('changeValue').value = change >= 0 ? 'R$ ' + change.toFixed(2) : 'R$ 0,00';
+        });
+
+        // Finalizar venda
+        function finalizeSale() {
+            if (cart.length === 0) {
+                alert('Carrinho vazio!');
+                return;
+            }
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            const received = parseFloat(document.getElementById('receivedValue').value) || 0;
+            
+            if (selectedPayment === 'money' && received < total) {
+                alert('Valor recebido insuficiente!');
+                return;
+            }
+            
+            // Atualizar estoque
+            cart.forEach(item => {
+                const product = products.find(p => p.id === item.id);
+                if (product) product.stock -= item.qty;
+            });
+            
+            // Salvar venda
+            const sale = {
+                id: sales.length + 1,
+                date: new Date().toLocaleString('pt-BR'),
+                operator: currentUser.name,
+                items: [...cart],
+                total: total,
+                payment: selectedPayment,
+                received: received,
+                change: received - total
+            };
+            sales.push(sale);
+            
+            // Mostrar cupom
+            showCupom(sale);
+            
+            // Limpar carrinho
+            cart = [];
+            document.getElementById('receivedValue').value = '';
+            document.getElementById('changeValue').value = '';
+            renderCart();
+            renderProducts();
+        }
+
+        // Mostrar cupom fiscal
+        function showCupom(sale) {
+            const paymentNames = {
+                money: 'DINHEIRO',
+                debit: 'DÉBITO',
+                credit: 'CRÉDITO',
+                pix: 'PIX'
+            };
+            
+            let cupomHTML = `
+                <div class="cupom-header">
+                    ${marketData?.logo ? `<img src="${marketData.logo}" alt="Logo" style="max-width: 100px; margin-bottom: 10px;">` : ''}
+                    <h3>${marketData?.name || 'SUPERMERCADO'}</h3>
+                    <p>CNPJ: ${marketData?.cnpj || 'Não informado'}</p>
+                    <p>${marketData?.address || 'Endereço não informado'}</p>
+                    <p>Tel: ${marketData?.phone || 'Não informado'}</p>
+                </div>
+                <div style="margin: 15px 0;">
+                    <strong>CUPOM FISCAL</strong><br>
+                    Data: ${sale.date}<br>
+                    Operador: ${sale.operator}
+                </div>
+                <div style="border-top: 1px dashed #333; border-bottom: 1px dashed #333; padding: 10px 0; margin: 10px 0;">
+            `;
+            
+            sale.items.forEach(item => {
+                cupomHTML += `
+                    <div class="cupom-item">
+                        <div>
+                            <div><strong>${item.name}</strong></div>
+                            <div style="font-size: 11px;">${item.qty} x R$ ${item.price.toFixed(2)}</div>
+                        </div>
+                        <div><strong>R$ ${(item.price * item.qty).toFixed(2)}</strong></div>
+                    </div>
+                `;
+            });
+            
+            cupomHTML += `
+                </div>
+                <div class="cupom-total">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>TOTAL:</span>
+                        <span>R$ ${sale.total.toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>FORMA PAGTO:</span>
+                        <span>${paymentNames[sale.payment]}</span>
+                    </div>
+            `;
+            
+            if (sale.payment === 'money') {
+                cupomHTML += `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>RECEBIDO:</span>
+                        <span>R$ ${sale.received.toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>TROCO:</span>
+                        <span>R$ ${sale.change.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+            
+            cupomHTML += `
+                </div>
+                <div class="cupom-footer">
+                    <p>Obrigado pela preferência!</p>
+                    <p>Volte sempre!</p>
+                    <p style="margin-top: 10px;">Sistema PDV - Venda #${sale.id}</p>
+                </div>
+            `;
+            
+            document.getElementById('cupomContent').innerHTML = cupomHTML;
+            document.getElementById('cupomModal').classList.add('active');
+        }
+
+        function closeCupom() {
+            document.getElementById('cupomModal').classList.remove('active');
+        }
+
+        function printCupom() {
+            window.print();
+        }
+
+        // Admin Panel
+        function toggleAdmin() {
+            if (currentUser?.type !== 'owner') {
+                alert('Acesso negado! Apenas o dono pode acessar o painel administrativo.');
+                return;
+            }
+            
+            const pdv = document.getElementById('pdvScreen');
+            const admin = document.getElementById('adminPanel');
+            
+            if (admin.style.display === 'block') {
+                admin.style.display = 'none';
+                pdv.style.display = 'block';
+            } else {
+                pdv.style.display = 'none';
+                admin.style.display = 'block';
+                loadAdminData();
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+        }
+
+        function loadAdminData() {
+            renderProductsTable();
+            renderOperatorsTable();
+            renderSalesTable();
+            loadConfigData();
+        }
+
+        function renderProductsTable() {
+            const tbody = document.getElementById('productsTableBody');
+            tbody.innerHTML = products.map(p => `
+                <tr>
+                    <td>${p.code}</td>
+                    <td>${p.name}</td>
+                    <td>R$ ${p.price.toFixed(2)}</td>
+                    <td>${p.stock}</td>
+                    <td>
+                        <button class="btn-small btn-edit" onclick="editProduct(${p.id})">Editar</button>
+                        <button class="btn-small btn-delete" onclick="deleteProduct(${p.id})">Excluir</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderOperatorsTable() {
+            const tbody = document.getElementById('operatorsTableBody');
+            tbody.innerHTML = operators.map(op => `
+                <tr>
+                    <td>${op.name}</td>
+                    <td>${op.email}</td>
+                    <td><span style="color: ${op.active ? '#10b981' : '#ef4444'};">${op.active ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>
+                        <button class="btn-small btn-edit" onclick="editOperator(${op.id})">Editar</button>
+                        <button class="btn-small btn-delete" onclick="deleteOperator(${op.id})">Excluir</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderSalesTable() {
+            const tbody = document.getElementById('salesTableBody');
+            tbody.innerHTML = sales.map(s => `
+                <tr>
+                    <td>${s.date}</td>
+                    <td>${s.operator}</td>
+                    <td>R$ ${s.total.toFixed(2)}</td>
+                    <td>${s.payment.toUpperCase()}</td>
+                    <td>
+                        <button class="btn-small btn-edit" onclick="viewSale(${s.id})">Ver Detalhes</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadConfigData() {
+            if (marketData) {
+                document.getElementById('cfgMarketName').value = marketData.name;
+                document.getElementById('cfgCNPJ').value = marketData.cnpj;
+                document.getElementById('cfgAddress').value = marketData.address;
+                document.getElementById('cfgPhone').value = marketData.phone;
+                document.getElementById('cfgLogo').value = marketData.logo || '';
+            }
+        }
+
+        document.getElementById('configForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            marketData.name = document.getElementById('cfgMarketName').value;
+            marketData.cnpj = document.getElementById('cfgCNPJ').value;
+            marketData.address = document.getElementById('cfgAddress').value;
+            marketData.phone = document.getElementById('cfgPhone').value;
+            marketData.logo = document.getElementById('cfgLogo').value;
+            alert('Configurações salvas com sucesso!');
+        });
+
+        // CRUD Produtos
+        function addProduct() {
+            const name = prompt('Nome do produto:');
+            if (!name) return;
+            const code = prompt('Código de barras:');
+            if (!code) return;
+            const price = parseFloat(prompt('Preço:'));
+            if (!price) return;
+            const stock = parseInt(prompt('Estoque:'));
+            if (!stock && stock !== 0) return;
+            
+            products.push({
+                id: products.length + 1,
+                code: code,
+                name: name,
+                price: price,
+                stock: stock
+            });
+            renderProductsTable();
+            renderProducts();
+        }
+
+        function editProduct(id) {
+            const product = products.find(p => p.id === id);
+            if (!product) return;
+            
+            const name = prompt('Nome do produto:', product.name);
+            if (!name) return;
+            const price = parseFloat(prompt('Preço:', product.price));
+            if (!price) return;
+            const stock = parseInt(prompt('Estoque:', product.stock));
+            if (!stock && stock !== 0) return;
+            
+            product.name = name;
+            product.price = price;
+            product.stock = stock;
+            renderProductsTable();
+            renderProducts();
+        }
+
+        function deleteProduct(id) {
+            if (!confirm('Deseja realmente excluir este produto?')) return;
+            products = products.filter(p => p.id !== id);
+            renderProductsTable();
+            renderProducts();
+        }
+
+        // CRUD Operadores
+        function addOperator() {
+            const name = prompt('Nome do operador:');
+            if (!name) return;
+            const email = prompt('E-mail:');
+            if (!email) return;
+            const password = prompt('Senha:');
+            if (!password) return;
+            
+            operators.push({
+                id: operators.length + 1,
+                name: name,
+                email: email,
+                password: password,
+                active: true
+            });
+            renderOperatorsTable();
+        }
+
+        function editOperator(id) {
+            const operator = operators.find(op => op.id === id);
+            if (!operator) return;
+            
+            const name = prompt('Nome do operador:', operator.name);
+            if (!name) return;
+            const email = prompt('E-mail:', operator.email);
+            if (!email) return;
+            
+            operator.name = name;
+            operator.email = email;
+            renderOperatorsTable();
+        }
+
+        function deleteOperator(id) {
+            if (!confirm('Deseja realmente excluir este operador?')) return;
+            operators = operators.filter(op => op.id !== id);
+            renderOperatorsTable();
+        }
+
+        function viewSale(id) {
+            const sale = sales.find(s => s.id === id);
+            if (sale) showCupom(sale);
+        }
+
+        // Inicializar
+        renderProducts();
+    </script>
+</body>
+</html>
+</html>

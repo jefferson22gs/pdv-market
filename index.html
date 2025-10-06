@@ -548,7 +548,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Entrar</button>
                 </form>
-                <div class="link-btn" onclick="showRegisterScreen()">
+                <div class="link-btn" id="linkRegister">
                     Não tem conta? Cadastre-se aqui
                 </div>
             </div>
@@ -591,7 +591,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Cadastrar Mercado</button>
                 </form>
-                <div class="link-btn" onclick="showLoginScreen()">
+                <div class="link-btn" id="linkLogin">
                     Já tem conta? Faça login
                 </div>
             </div>
@@ -602,7 +602,7 @@
                 <h1 id="marketNameDisplay">Sistema PDV</h1>
                 <div class="user-info">
                     <span id="userNameDisplay">Usuário</span>
-                    <button class="btn-logout" onclick="logout()">Sair</button>
+                    <button class="btn-logout" id="btnLogout">Sair</button>
                 </div>
             </div>
             <div class="pdv-body">
@@ -636,7 +636,7 @@
                         </div>
                         <div class="payment-section">
                             <h4>Forma de Pagamento</h4>
-                            <div class="payment-methods">
+                            <div class="payment-methods" id="paymentMethods">
                                 <div class="payment-method active" data-method="money">Dinheiro</div>
                                 <div class="payment-method" data-method="debit">Débito</div>
                                 <div class="payment-method" data-method="credit">Crédito</div>
@@ -651,8 +651,8 @@
                                 <input type="text" id="changeValue" readonly style="background: #f3f4f6;">
                             </div>
                         </div>
-                        <button class="btn btn-secondary" onclick="finalizeSale()">Finalizar Venda</button>
-                        <button class="btn btn-danger" onclick="clearCart()">Limpar Carrinho</button>
+                        <button class="btn btn-secondary" id="btnFinalizeSale">Finalizar Venda</button>
+                        <button class="btn btn-danger" id="btnClearCart">Limpar Carrinho</button>
                     </div>
                 </div>
             </div>
@@ -673,30 +673,28 @@
         let selectedPayment = 'money';
         let productsCache = [];
 
-        // DEBUG MODE - ative isso para ver logs detalhados
         const DEBUG = true;
         function debugLog(message, data) {
             if (DEBUG) {
-                console.log(`[PDV DEBUG] ${message}`, data || '');
+                console.log('[PDV DEBUG] ' + message, data !== undefined ? data : '');
             }
         }
 
-        // Inicializar Supabase
         async function initSupabase() {
             try {
                 debugLog('Inicializando Supabase...');
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 
-                const { error } = await supabaseClient.from('markets').select('count').limit(1);
+                const testQuery = await supabaseClient.from('markets').select('count').limit(1);
                 
-                if (error) throw error;
+                if (testQuery.error) throw testQuery.error;
                 
                 debugLog('Supabase conectado com sucesso');
                 showConnectionStatus('Conectado ao banco de dados', 'success');
                 return true;
             } catch (error) {
                 console.error('Erro ao conectar:', error);
-                showConnectionStatus('Erro na conexão. Verifique as credenciais do Supabase.', 'error');
+                showConnectionStatus('Erro na conexão com o banco de dados', 'error');
                 return false;
             }
         }
@@ -704,31 +702,32 @@
         function showConnectionStatus(message, type) {
             const statusDiv = document.getElementById('connectionStatus');
             if (statusDiv) {
-                statusDiv.className = `connection-status ${type}`;
+                statusDiv.className = 'connection-status ' + type;
                 statusDiv.textContent = message;
                 
                 if (type === 'success') {
-                    setTimeout(() => {
+                    setTimeout(function() {
                         statusDiv.style.display = 'none';
                     }, 3000);
                 }
             }
         }
 
-        // Toast notification
-        function showToast(message, duration = 2000, isError = false) {
-            debugLog('Toast:', message);
+        function showToast(message, duration, isError) {
+            if (duration === undefined) duration = 2000;
+            if (isError === undefined) isError = false;
+            
+            debugLog('Toast: ' + message);
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = 'toast show';
             if (isError) toast.classList.add('error');
             
-            setTimeout(() => {
+            setTimeout(function() {
                 toast.className = 'toast';
             }, duration);
         }
 
-        // Navegação
         function showLoginScreen() {
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
@@ -739,30 +738,29 @@
             document.getElementById('registerScreen').classList.remove('hidden');
         }
 
-        // Autenticação
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             const type = document.getElementById('loginType').value;
 
-            debugLog('Tentando login', { email, type });
+            debugLog('Tentando login', { email: email, type: type });
 
             try {
                 if (type === 'owner') {
-                    const { data, error } = await supabaseClient
+                    const result = await supabaseClient
                         .from('markets')
                         .select('*')
                         .eq('email', email)
                         .single();
 
-                    if (error || !data) {
+                    if (result.error || !result.data) {
                         throw new Error('Dono não encontrado.');
                     }
                     
-                    if (data.password === password) {
-                        marketData = data;
+                    if (result.data.password === password) {
+                        marketData = result.data;
                         currentUser = { 
                             type: 'owner', 
                             name: marketData.name, 
@@ -775,25 +773,25 @@
                         showToast('E-mail ou senha incorretos!', 3000, true);
                     }
                 } else {
-                    const { data: operator, error } = await supabaseClient
+                    const result = await supabaseClient
                         .from('operators')
                         .select('*, markets(*)')
                         .eq('email', email)
                         .single();
 
-                    if (error || !operator) {
+                    if (result.error || !result.data) {
                         throw new Error('Operador não encontrado.');
                     }
                     
-                    if (operator.password === password) {
-                        if (!operator.active) {
+                    if (result.data.password === password) {
+                        if (!result.data.active) {
                             showToast('Operador desativado. Contate o administrador.', 3000, true);
                             return;
                         }
-                        marketData = operator.markets;
+                        marketData = result.data.markets;
                         currentUser = { 
                             type: 'operator', 
-                            name: operator.name, 
+                            name: result.data.name, 
                             email: email, 
                             market_id: marketData.id 
                         };
@@ -809,7 +807,7 @@
             }
         });
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const newMarket = {
@@ -825,23 +823,22 @@
             debugLog('Registrando mercado', newMarket);
 
             try {
-                const { data, error } = await supabaseClient
+                const result = await supabaseClient
                     .from('markets')
                     .insert([newMarket])
                     .select();
 
-                if (error) throw error;
+                if (result.error) throw result.error;
 
                 showToast('Mercado cadastrado com sucesso!', 3000);
                 showLoginScreen();
                 document.getElementById('registerForm').reset();
             } catch (error) {
                 console.error('Erro ao cadastrar:', error);
-                showToast('Erro ao cadastrar. Email ou CNPJ já cadastrados.', 3000, true);
+                showToast('Erro ao cadastrar mercado', 3000, true);
             }
         });
 
-        // PDV
         async function showPDV() {
             debugLog('Mostrando PDV');
             document.getElementById('loginScreen').classList.add('hidden');
@@ -849,7 +846,7 @@
             document.getElementById('pdvScreen').style.display = 'block';
             
             document.getElementById('userNameDisplay').textContent = currentUser.name;
-            document.getElementById('marketNameDisplay').textContent = marketData?.name || 'Sistema PDV';
+            document.getElementById('marketNameDisplay').textContent = marketData ? marketData.name : 'Sistema PDV';
             
             await loadProducts();
             renderCart();
@@ -869,21 +866,21 @@
 
         async function loadProducts() {
             try {
-                debugLog('Carregando produtos para market_id:', currentUser.market_id);
+                debugLog('Carregando produtos para market_id: ' + currentUser.market_id);
                 
-                const { data: products, error } = await supabaseClient
+                const result = await supabaseClient
                     .from('products')
                     .select('*')
                     .eq('market_id', currentUser.market_id)
                     .order('name');
 
-                if (error) {
-                    console.error('Erro Supabase ao carregar produtos:', error);
-                    throw error;
+                if (result.error) {
+                    console.error('Erro Supabase ao carregar produtos:', result.error);
+                    throw result.error;
                 }
                 
-                productsCache = products || [];
-                debugLog('Produtos carregados:', productsCache.length);
+                productsCache = result.data || [];
+                debugLog('Produtos carregados: ' + productsCache.length);
                 
                 if (productsCache.length === 0) {
                     debugLog('AVISO: Nenhum produto encontrado para este mercado');
@@ -901,47 +898,55 @@
             const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
             const codeSearch = document.getElementById('productCode').value.toLowerCase();
             
-            let filteredProducts = productsCache;
+            let filteredProducts = productsCache.slice();
             
             if (searchTerm) {
-                filteredProducts = filteredProducts.filter(p => 
-                    p.name.toLowerCase().includes(searchTerm) || 
-                    (p.code && p.code.toLowerCase().includes(searchTerm))
-                );
+                filteredProducts = filteredProducts.filter(function(p) {
+                    return p.name.toLowerCase().includes(searchTerm) || 
+                           (p.code && p.code.toLowerCase().includes(searchTerm));
+                });
             }
             
             if (codeSearch) {
-                filteredProducts = filteredProducts.filter(p => 
-                    (p.code && p.code.toLowerCase().includes(codeSearch))
-                );
+                filteredProducts = filteredProducts.filter(function(p) {
+                    return (p.code && p.code.toLowerCase().includes(codeSearch));
+                });
             }
             
-            debugLog('Renderizando produtos filtrados:', filteredProducts.length);
+            debugLog('Renderizando produtos filtrados: ' + filteredProducts.length);
             
             if (filteredProducts.length === 0) {
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #6b7280;">Nenhum produto encontrado</p>';
                 return;
             }
             
-            grid.innerHTML = filteredProducts.map(p => `
-                <div class="product-card" onclick="addToCart(${p.id})">
-                    <h4>${p.name}</h4>
-                    <div class="price">R$ ${parseFloat(p.price).toFixed(2)}</div>
-                    <div class="stock-info">Estoque: ${p.stock}</div>
-                </div>
-            `).join('');
+            grid.innerHTML = filteredProducts.map(function(p) {
+                return '<div class="product-card" data-product-id="' + p.id + '">' +
+                    '<h4>' + p.name + '</h4>' +
+                    '<div class="price">R$ ' + parseFloat(p.price).toFixed(2) + '</div>' +
+                    '<div class="stock-info">Estoque: ' + p.stock + '</div>' +
+                    '</div>';
+            }).join('');
+            
+            // Adicionar event listeners aos produtos
+            const productCards = grid.querySelectorAll('.product-card');
+            productCards.forEach(function(card) {
+                card.addEventListener('click', function() {
+                    const productId = parseInt(this.getAttribute('data-product-id'));
+                    addToCart(productId);
+                });
+            });
         }
 
-        document.getElementById('searchProduct').addEventListener('input', renderProducts);
-        document.getElementById('productCode').addEventListener('input', renderProducts);
-
         function addToCart(productId) {
-            debugLog('Adicionando produto ao carrinho, ID:', productId);
+            debugLog('Adicionando produto ao carrinho, ID: ' + productId);
             
-            const product = productsCache.find(p => p.id === productId);
+            const product = productsCache.find(function(p) {
+                return p.id === productId;
+            });
             
             if (!product) {
-                debugLog('ERRO: Produto não encontrado no cache', productId);
+                debugLog('ERRO: Produto não encontrado no cache ' + productId);
                 showToast("Produto não encontrado!", 2000, true);
                 return;
             }
@@ -954,7 +959,9 @@
                 return;
             }
             
-            const cartItem = cart.find(item => item.id === productId);
+            const cartItem = cart.find(function(item) {
+                return item.id === productId;
+            });
             
             if (cartItem) {
                 if (cartItem.qty >= product.stock) {
@@ -965,52 +972,82 @@
                 cartItem.qty++;
                 debugLog('Quantidade atualizada:', cartItem);
             } else {
-                cart.push({...product, qty: 1});
+                const newItem = {
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    stock: product.stock,
+                    qty: 1
+                };
+                cart.push(newItem);
                 debugLog('Novo item adicionado ao carrinho');
             }
             
             debugLog('Carrinho atual:', cart);
-            showToast(`${product.name} adicionado`);
+            showToast(product.name + ' adicionado');
             renderCart();
         }
 
         function renderCart() {
-            debugLog('Renderizando carrinho, itens:', cart.length);
+            debugLog('Renderizando carrinho, itens: ' + cart.length);
             
             const cartDiv = document.getElementById('cartItems');
             
             if (cart.length === 0) {
                 cartDiv.innerHTML = '<p style="text-align: center; color: #6b7280;">Carrinho vazio</p>';
             } else {
-                cartDiv.innerHTML = cart.map(item => `
-                    <div class="cart-item">
-                        <div class="cart-item-info">
-                            <h4>${item.name}</h4>
-                            <p>R$ ${parseFloat(item.price).toFixed(2)} cada</p>
-                        </div>
-                        <div class="cart-item-actions">
-                            <button class="qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
-                            <span class="qty-display">${item.qty}</span>
-                            <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
-                            <button class="btn-remove" onclick="removeFromCart(${item.id})">×</button>
-                        </div>
-                    </div>
-                `).join('');
+                cartDiv.innerHTML = cart.map(function(item) {
+                    return '<div class="cart-item">' +
+                        '<div class="cart-item-info">' +
+                            '<h4>' + item.name + '</h4>' +
+                            '<p>R$ ' + parseFloat(item.price).toFixed(2) + ' cada</p>' +
+                        '</div>' +
+                        '<div class="cart-item-actions">' +
+                            '<button class="qty-btn" data-action="decrease" data-id="' + item.id + '">-</button>' +
+                            '<span class="qty-display">' + item.qty + '</span>' +
+                            '<button class="qty-btn" data-action="increase" data-id="' + item.id + '">+</button>' +
+                            '<button class="btn-remove" data-id="' + item.id + '">×</button>' +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+                
+                // Event listeners para botões do carrinho
+                cartDiv.querySelectorAll('.qty-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const productId = parseInt(this.getAttribute('data-id'));
+                        const action = this.getAttribute('data-action');
+                        const change = action === 'increase' ? 1 : -1;
+                        updateQty(productId, change);
+                    });
+                });
+                
+                cartDiv.querySelectorAll('.btn-remove').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        const productId = parseInt(this.getAttribute('data-id'));
+                        removeFromCart(productId);
+                    });
+                });
             }
             
             updateTotals();
         }
 
         function updateQty(productId, change) {
-            debugLog('Atualizando quantidade', { productId, change });
+            debugLog('Atualizando quantidade', { productId: productId, change: change });
             
-            const cartItem = cart.find(item => item.id === productId);
+            const cartItem = cart.find(function(item) {
+                return item.id === productId;
+            });
+            
             if (!cartItem) {
                 debugLog('ERRO: Item não encontrado no carrinho');
                 return;
             }
 
-            const product = productsCache.find(p => p.id === productId);
+            const product = productsCache.find(function(p) {
+                return p.id === productId;
+            });
+            
             if (!product) {
                 debugLog('ERRO: Produto não encontrado no cache');
                 return;
@@ -1029,8 +1066,10 @@
         }
 
         function removeFromCart(productId) {
-            debugLog('Removendo item do carrinho:', productId);
-            cart = cart.filter(item => item.id !== productId);
+            debugLog('Removendo item do carrinho: ' + productId);
+            cart = cart.filter(function(item) {
+                return item.id !== productId;
+            });
             renderCart();
         }
 
@@ -1045,25 +1084,21 @@
         }
 
         function updateTotals() {
-            const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.qty), 0);
+            const subtotal = cart.reduce(function(sum, item) {
+                return sum + (parseFloat(item.price) * item.qty);
+            }, 0);
+            
             document.getElementById('subtotal').textContent = 'R$ ' + subtotal.toFixed(2);
             document.getElementById('total').textContent = 'R$ ' + subtotal.toFixed(2);
             
-            debugLog('Totais atualizados:', subtotal);
+            debugLog('Totais atualizados: ' + subtotal);
         }
-
-        document.querySelectorAll('.payment-method').forEach(method => {
-            method.addEventListener('click', function() {
-                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
-                this.classList.add('active');
-                selectedPayment = this.dataset.method;
-                debugLog('Método de pagamento selecionado:', selectedPayment);
-            });
-        });
 
         document.getElementById('receivedValue').addEventListener('input', function() {
             const received = parseFloat(this.value) || 0;
-            const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.qty), 0);
+            const total = cart.reduce(function(sum, item) {
+                return sum + (parseFloat(item.price) * item.qty);
+            }, 0);
             const change = received - total;
             document.getElementById('changeValue').value = change >= 0 ? 'R$ ' + change.toFixed(2) : 'R$ 0,00';
         });
@@ -1076,10 +1111,13 @@
                 return;
             }
             
-            const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.qty), 0);
+            const total = cart.reduce(function(sum, item) {
+                return sum + (parseFloat(item.price) * item.qty);
+            }, 0);
+            
             const received = parseFloat(document.getElementById('receivedValue').value) || 0;
             
-            debugLog('Valores da venda', { total, received, payment: selectedPayment });
+            debugLog('Valores da venda', { total: total, received: received, payment: selectedPayment });
             
             if (selectedPayment === 'money' && received < total) {
                 showToast('Valor recebido insuficiente!', 2000, true);
@@ -1089,21 +1127,25 @@
             try {
                 // Atualizar estoque
                 debugLog('Atualizando estoque dos produtos...');
-                for (const item of cart) {
+                for (let i = 0; i < cart.length; i++) {
+                    const item = cart[i];
                     const newStock = item.stock - item.qty;
-                    debugLog(`Atualizando produto ${item.id}: estoque ${item.stock} -> ${newStock}`);
+                    debugLog('Atualizando produto ' + item.id + ': estoque ' + item.stock + ' -> ' + newStock);
                     
-                    const { error } = await supabaseClient
+                    const updateResult = await supabaseClient
                         .from('products')
                         .update({ stock: newStock })
                         .eq('id', item.id);
                     
-                    if (error) {
-                        console.error('Erro ao atualizar estoque:', error);
-                        throw error;
+                    if (updateResult.error) {
+                        console.error('Erro ao atualizar estoque:', updateResult.error);
+                        throw updateResult.error;
                     }
                     
-                    const cachedProduct = productsCache.find(p => p.id === item.id);
+                    const cachedProduct = productsCache.find(function(p) {
+                        return p.id === item.id;
+                    });
+                    
                     if (cachedProduct) {
                         cachedProduct.stock = newStock;
                     }
@@ -1122,18 +1164,18 @@
                 
                 debugLog('Salvando venda:', saleData);
                 
-                const { data: newSale, error: saleError } = await supabaseClient
+                const saleResult = await supabaseClient
                     .from('sales')
                     .insert([saleData])
                     .select()
                     .single();
 
-                if (saleError) {
-                    console.error('Erro ao salvar venda:', saleError);
-                    throw saleError;
+                if (saleResult.error) {
+                    console.error('Erro ao salvar venda:', saleResult.error);
+                    throw saleResult.error;
                 }
 
-                debugLog('Venda finalizada com sucesso:', newSale);
+                debugLog('Venda finalizada com sucesso:', saleResult.data);
                 showToast("Venda finalizada com sucesso!");
                 
                 cart = [];
@@ -1148,8 +1190,29 @@
             }
         }
 
+        // Event Listeners
+        document.getElementById('linkRegister').addEventListener('click', showRegisterScreen);
+        document.getElementById('linkLogin').addEventListener('click', showLoginScreen);
+        document.getElementById('btnLogout').addEventListener('click', logout);
+        document.getElementById('searchProduct').addEventListener('input', renderProducts);
+        document.getElementById('productCode').addEventListener('input', renderProducts);
+        document.getElementById('btnClearCart').addEventListener('click', clearCart);
+        document.getElementById('btnFinalizeSale').addEventListener('click', finalizeSale);
+
+        // Payment methods
+        document.getElementById('paymentMethods').addEventListener('click', function(e) {
+            if (e.target.classList.contains('payment-method')) {
+                document.querySelectorAll('.payment-method').forEach(function(m) {
+                    m.classList.remove('active');
+                });
+                e.target.classList.add('active');
+                selectedPayment = e.target.getAttribute('data-method');
+                debugLog('Método de pagamento selecionado: ' + selectedPayment);
+            }
+        });
+
         // Inicializar aplicação
-        window.addEventListener('DOMContentLoaded', async () => {
+        window.addEventListener('DOMContentLoaded', async function() {
             debugLog('=== SISTEMA PDV INICIANDO ===');
             const connected = await initSupabase();
             
@@ -1157,16 +1220,6 @@
                 console.error('FALHA NA CONEXÃO COM SUPABASE');
             }
         });
-
-        // Expor funções globalmente para onclick
-        window.showRegisterScreen = showRegisterScreen;
-        window.showLoginScreen = showLoginScreen;
-        window.logout = logout;
-        window.addToCart = addToCart;
-        window.updateQty = updateQty;
-        window.removeFromCart = removeFromCart;
-        window.clearCart = clearCart;
-        window.finalizeSale = finalizeSale;
     </script>
 </body>
 </html>

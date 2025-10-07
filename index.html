@@ -1020,32 +1020,15 @@
 
         // SERVICE WORKER (PWA) - registrando a partir de um Blob para melhor compatibilidade
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', async () => {
-                try {
-                    const swCode = `
-                        const CACHE_NAME = 'pdv-v1';
-                        const urlsToCache = ['/'];
-                        self.addEventListener('install', (event) => {
-                            event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache)));
-                        });
-                        self.addEventListener('activate', (event) => {
-                            event.waitUntil(self.clients.claim());
-                        });
-                        self.addEventListener('fetch', (event) => {
-                            event.respondWith(
-                                fetch(event.request).catch(() => caches.match(event.request)).then(resp => resp || caches.match('/'))
-                            );
-                        });
-                    `;
-                    const blob = new Blob([swCode], { type: 'application/javascript' });
-                    const swUrl = URL.createObjectURL(blob);
-                    const registration = await navigator.serviceWorker.register(swUrl);
-                    console.log('Service Worker registrado com sucesso', registration);
-                } catch (err) {
-                    console.log('Erro no Service Worker:', err);
-                }
-            });
-        }
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      console.log('Service Worker registrado com sucesso:', registration);
+    } catch (err) {
+      console.error('Erro no Service Worker:', err);
+    }
+  });
+}
 
         // Inicializar
         window.addEventListener('DOMContentLoaded', async () => {
@@ -1054,3 +1037,4 @@
     </script>
 </body>
 </html>
+

@@ -650,8 +650,10 @@
     }
 
     const total = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
-    const received = parseFloat(document.getElementById("received").value || 0);
-    const selectedPayment = selectedPaymentMethod || "money"; // garante que sempre exista algo
+    const received = parseFloat(document.getElementById("receivedValue").value || 0);
+
+    // usa a variável global correta
+    const paymentMethod = selectedPayment || "money";
 
     if (!currentUser || !currentUser.name) {
         alert("Erro: operador não identificado.");
@@ -662,21 +664,23 @@
         operator_name: currentUser.name,
         items: cart,
         total: total,
-        payment_method: selectedPayment,
+        payment_method: paymentMethod,
         received: received,
         change: received > total ? received - total : 0,
         market_id: currentUser.market_id,
-        created_at: new Date().toISOString() // data/hora real
+        created_at: new Date().toISOString()
     };
 
     try {
-        const { data, error } = await supabase.from("sales").insert([saleData]).select();
+        const { data, error } = await supabaseClient
+            .from("sales")
+            .insert([saleData])
+            .select();
+
         if (error) throw error;
 
-        // Exibe cupom imediatamente
         showCupom(data[0]);
 
-        // Limpa carrinho
         cart = [];
         localStorage.removeItem("cart");
         renderCart();
@@ -686,6 +690,7 @@
         alert("Erro ao finalizar venda!");
     }
 }
+
 
 
         // Cupom
@@ -848,9 +853,9 @@
                 tbody.innerHTML = (sales || []).map(s => `
                     <tr>
                         <td>${new Date(s.created_at).toLocaleString('pt-BR')}</td>
-                       <td>${sale.operator_name || "Não informado"}</td>
+                       <td>${s.operator_name || "Não informado"}</td>
                         <td>R$ ${parseFloat(s.total || 0).toFixed(2)}</td>
-                        <td>${sale.payment_method ? sale.payment_method.toUpperCase() : "-"}</td>
+                        <td>${s.payment_method ? s.payment_method.toUpperCase() : "-"}</td>
                         <td>
                             <button class="btn-small btn-edit" onclick="viewSale('${String(s.id)}')">Ver Detalhes</button>
                         </td>
@@ -1045,6 +1050,7 @@
     </script>
 </body>
 </html>
+
 
 
 

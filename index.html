@@ -100,7 +100,56 @@
         .connection-status.error{ background:#fee; color:#c00; border:1px solid #fcc; } .connection-status.success{ background:#efe; color:#060; border:1px solid #cfc; }
         @media (max-width:1024px) { .pdv-body{ grid-template-columns:1fr; height:auto; } .pdv-right{ border-top:2px solid #e5e7eb; border-right:none; } }
         @media (max-width:768px) { .container{ padding:0; } .pdv-header{ flex-direction:column; align-items:flex-start; padding:15px; } .products-grid{ grid-template-columns:repeat(2,1fr); gap:10px; } }
-    </style>
+    
+/* ==== PRINT STYLES FOR THERMAL RECEIPTS ==== */
+@media print {
+  @page {
+    size: 58mm auto;   /* altere para 80mm se sua bobina for 80mm */
+    margin: 0;
+  }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 58mm !important;
+    background: #fff !important;
+  }
+
+  /* esconder a UI do sistema e mostrar apenas o conteúdo do cupom */
+  .container,
+  .pdv-container,
+  .auth-container,
+  .modal-actions,
+  .toast { display: none !important; }
+
+  #cupomModal,
+  #cupomModal .modal-content,
+  #cupomContent {
+    display: block !important;
+    position: static !important;
+    width: 58mm !important;
+    max-width: 58mm !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    background: #fff !important;
+  }
+
+  /* tipografia e espaçamento reduzidos para cupom de 58mm */
+  #cupomContent {
+    font-family: 'Courier New', monospace !important;
+    font-size: 10pt !important;   /* ajuste fino entre 9pt ~ 11pt */
+    line-height: 1.25 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* linhas horizontais mais finas */
+  #cupomContent hr {
+    border: 0;
+    border-top: 1px dashed #000;
+    margin: 4px 0;
+  }
+}
+</style>
 </head>
 <body>
     <div class="container">

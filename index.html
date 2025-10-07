@@ -644,51 +644,49 @@
         });
 
         async function finalizeSale() {
-            if (!cart || cart.length === 0) { showToast('Carrinho vazio!', 2000, true); return; }
-            const total = (cart || []).reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.qty || 0)), 0);
-            const received = parseFloat(document.getElementById('receivedValue').value) || 0;
-            if (selectedPayment === 'money' && received < total) { showToast('Valor recebido insuficiente!', 2000, true); return; }
-            try {
-                // Atualiza estoque
-                for (const item of cart) {
-                    const newStock = (item.stock ?? 0) - (item.qty ?? 0);
-                    const { error } = await supabaseClient
-                        .from('products')
-                        .update({ stock: newStock })
-                        .eq('id', item.id);
-                    if (error) throw error;
-                    const cachedProduct = (productsCache || []).find(p => String(p.id) === String(item.id));
-                    if (cachedProduct) cachedProduct.stock = newStock;
-                }
-                // Salvar venda
-                const saleData = {
-    operator_name: currentUser.name,
-    items: cart,
-    total: total,
-    payment_method: selectedPayment,
-    received: received,
-    change: received > total ? received - total : 0,
-    market_id: currentUser.market_id
-};
+    if (cart.length === 0) {
+        alert("O carrinho está vazio!");
+        return;
+    }
 
-                const { data: newSale, error: saleError } = await supabaseClient
-                    .from('sales')
-                    .insert([saleData])
-                    .select()
-                    .single();
-                if (saleError) throw saleError;
-                showToast("Venda finalizada com sucesso!");
-                showCupom(newSale);
-                cart = [];
-                document.getElementById('receivedValue').value = '';
-                document.getElementById('changeValue').value = '';
-                renderCart();
-                renderProducts();
-            } catch (error) {
-                console.error("Erro ao finalizar venda:", error);
-                showToast("Erro ao finalizar venda", 3000, true);
-            }
-        }
+    const total = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
+    const received = parseFloat(document.getElementById("received").value || 0);
+    const selectedPayment = selectedPaymentMethod || "money"; // garante que sempre exista algo
+
+    if (!currentUser || !currentUser.name) {
+        alert("Erro: operador não identificado.");
+        return;
+    }
+
+    const saleData = {
+        operator_name: currentUser.name,
+        items: cart,
+        total: total,
+        payment_method: selectedPayment,
+        received: received,
+        change: received > total ? received - total : 0,
+        market_id: currentUser.market_id,
+        created_at: new Date().toISOString() // data/hora real
+    };
+
+    try {
+        const { data, error } = await supabase.from("sales").insert([saleData]).select();
+        if (error) throw error;
+
+        // Exibe cupom imediatamente
+        showCupom(data[0]);
+
+        // Limpa carrinho
+        cart = [];
+        localStorage.removeItem("cart");
+        renderCart();
+        alert("Venda finalizada com sucesso!");
+    } catch (err) {
+        console.error("Erro ao finalizar venda:", err);
+        alert("Erro ao finalizar venda!");
+    }
+}
+
 
         // Cupom
         function showCupom(sale) {
@@ -1044,6 +1042,7 @@
     </script>
 </body>
 </html>
+
 
 
 

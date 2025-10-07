@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema PDV - Corrigido</title>
+    <title>Sistema PDV - Supermercado</title>
+    <meta name="theme-color" content="#2563eb"/>
+    <meta name="description" content="Sistema de Ponto de Venda para Supermercados"/>
+    <link rel="manifest" href='data:application/json;base64,ewogICJuYW1lIjogIlNpc3RlbWEgUERGIFN1cGVybWVyY2FkbyIsCiAgInNob3J0X25hbWUiOiAiUERWIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjMjU2M2ViIiwKICAiZGVzY3JpcHRpb24iOiAiU2lzdGVtYSBkZSBQb250byBkZSBWZW5kYSBwYXJhIFN1cGVybWVyY2Fkb3MiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3BuZztiYXNlNjQsMlZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQU1BQUFBREFDQVlBQUFBUz0iLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0='>
+    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAABGdBTUEAALGPC/xhBQAAAA1JREFUeJztwQEBAAAAgiD/r25IQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8GxYgAAb+lQvoAAAAASUVORK5CYII="/>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -467,6 +472,218 @@
             }
         }
 
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 15px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .cupom-fiscal {
+            padding: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .cupom-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #333;
+        }
+
+        .cupom-header h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .cupom-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+        }
+
+        .cupom-total {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed #333;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .cupom-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed #333;
+            font-size: 11px;
+        }
+
+        .modal-actions {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .admin-panel {
+            display: none;
+            padding: 30px;
+        }
+
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--light);
+            flex-wrap: wrap;
+        }
+
+        .admin-tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.3s;
+        }
+
+        .admin-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .admin-content {
+            display: none;
+        }
+
+        .admin-content.active {
+            display: block;
+        }
+
+        .table-container {
+            background: var(--white);
+            border-radius: 12px;
+            overflow-x: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--light);
+        }
+
+        tbody tr:hover {
+            background: var(--light);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: var(--warning);
+            color: var(--white);
+            margin-right: 5px;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: var(--white);
+        }
+        
+        .closing-report {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        .closing-report h3 {
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+        .report-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 16px;
+        }
+        .report-item:last-child {
+            border-bottom: none;
+        }
+        .report-item span:first-child {
+            font-weight: 500;
+            color: #374151;
+        }
+        .report-item span:last-child {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+        .report-item.total {
+            font-size: 20px;
+            font-weight: bold;
+            padding-top: 15px;
+            margin-top: 10px;
+            border-top: 2px solid #d1d5db;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -548,7 +765,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Entrar</button>
                 </form>
-                <div class="link-btn" id="linkRegister">
+                <div class="link-btn" onclick="showRegisterScreen()">
                     Não tem conta? Cadastre-se aqui
                 </div>
             </div>
@@ -591,7 +808,7 @@
                     </div>
                     <button type="submit" class="btn btn-primary">Cadastrar Mercado</button>
                 </form>
-                <div class="link-btn" id="linkLogin">
+                <div class="link-btn" onclick="showLoginScreen()">
                     Já tem conta? Faça login
                 </div>
             </div>
@@ -602,7 +819,8 @@
                 <h1 id="marketNameDisplay">Sistema PDV</h1>
                 <div class="user-info">
                     <span id="userNameDisplay">Usuário</span>
-                    <button class="btn-logout" id="btnLogout">Sair</button>
+                    <button class="btn-logout" onclick="logout()">Sair</button>
+                    <button class="btn-logout" id="adminBtn" onclick="toggleAdmin()">Admin</button>
                 </div>
             </div>
             <div class="pdv-body">
@@ -636,7 +854,7 @@
                         </div>
                         <div class="payment-section">
                             <h4>Forma de Pagamento</h4>
-                            <div class="payment-methods" id="paymentMethods">
+                            <div class="payment-methods">
                                 <div class="payment-method active" data-method="money">Dinheiro</div>
                                 <div class="payment-method" data-method="debit">Débito</div>
                                 <div class="payment-method" data-method="credit">Crédito</div>
@@ -651,10 +869,125 @@
                                 <input type="text" id="changeValue" readonly style="background: #f3f4f6;">
                             </div>
                         </div>
-                        <button class="btn btn-secondary" id="btnFinalizeSale">Finalizar Venda</button>
-                        <button class="btn btn-danger" id="btnClearCart">Limpar Carrinho</button>
+                        <button class="btn btn-secondary" onclick="finalizeSale()">Finalizar Venda</button>
+                        <button class="btn btn-danger" onclick="clearCart()">Limpar Carrinho</button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="pdv-container admin-panel" id="adminPanel">
+            <div class="pdv-header">
+                <h1>Painel Administrativo</h1>
+                <button class="btn-logout" onclick="toggleAdmin()">Voltar ao PDV</button>
+            </div>
+            <div style="padding: 30px;">
+                <div class="admin-tabs">
+                    <button class="admin-tab active" onclick="switchTab(event, 'products')">Produtos</button>
+                    <button class="admin-tab" onclick="switchTab(event, 'operators')">Operadores</button>
+                    <button class="admin-tab" onclick="switchTab(event, 'sales')">Vendas</button>
+                    <button class="admin-tab" onclick="switchTab(event, 'closing')">Fechamento</button>
+                    <button class="admin-tab" onclick="switchTab(event, 'config')">Configurações</button>
+                </div>
+
+                <div class="admin-content active" id="tabProducts">
+                    <button class="btn btn-primary" onclick="addProduct()" style="margin-bottom: 20px; width: auto;">+ Adicionar Produto</button>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nome</th>
+                                    <th>Preço</th>
+                                    <th>Estoque</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="admin-content" id="tabOperators">
+                    <button class="btn btn-primary" onclick="addOperator()" style="margin-bottom: 20px; width: auto;">+ Adicionar Operador</button>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>E-mail</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="operatorsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="admin-content" id="tabSales">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Operador</th>
+                                    <th>Total</th>
+                                    <th>Pagamento</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salesTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="admin-content" id="tabClosing">
+                    <h3 style="margin-bottom: 20px;">Fechamento de Caixa Diário</h3>
+                    <button class="btn btn-primary" onclick="generateDailyClosing()" style="width: auto;">Gerar Relatório do Dia</button>
+                    <div id="dailyClosingResult">
+                        <p style="margin-top: 20px; color: #6b7280;">Clique no botão acima para gerar o relatório de vendas de hoje.</p>
+                    </div>
+                </div>
+
+                <div class="admin-content" id="tabConfig">
+                    <div style="max-width: 600px;">
+                        <h3 style="margin-bottom: 20px;">Dados do Mercado</h3>
+                        <form id="configForm">
+                            <div class="form-group">
+                                <label>Nome do Mercado</label>
+                                <input type="text" id="cfgMarketName">
+                            </div>
+                            <div class="form-group">
+                                <label>CNPJ</label>
+                                <input type="text" id="cfgCNPJ">
+                            </div>
+                            <div class="form-group">
+                                <label>Endereço</label>
+                                <input type="text" id="cfgAddress">
+                            </div>
+                            <div class="form-group">
+                                <label>Telefone</label>
+                                <input type="text" id="cfgPhone">
+                            </div>
+                            <div class="form-group">
+                                <label>Logo (URL)</label>
+                                <input type="text" id="cfgLogo">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: auto;">Salvar Alterações</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="cupomModal">
+        <div class="modal-content">
+            <div class="cupom-fiscal" id="cupomContent"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="printCupom()">Imprimir</button>
+                <button class="btn btn-secondary" onclick="closeCupom()">Fechar</button>
             </div>
         </div>
     </div>
@@ -662,7 +995,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // Configuração do Supabase
+        // Configuração do Supabase - SUBSTITUA COM SUAS CREDENCIAIS
         const SUPABASE_URL = 'https://eymchtbskyhqghjwclkb.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bWNodGJza3locWdoandjbGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3Njk0NjUsImV4cCI6MjA3NTM0NTQ2NX0.eYzu0GHVcezfDZRq8-Eig1G-feXVOPBLU-566jVwfcs';
         
@@ -673,28 +1006,23 @@
         let selectedPayment = 'money';
         let productsCache = [];
 
-        const DEBUG = true;
-        function debugLog(message, data) {
-            if (DEBUG) {
-                console.log('[PDV DEBUG] ' + message, data !== undefined ? data : '');
-            }
-        }
-
+        // Inicializar Supabase e verificar conexão
         async function initSupabase() {
             try {
-                debugLog('Inicializando Supabase...');
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 
-                const testQuery = await supabaseClient.from('markets').select('count').limit(1);
+                // Testar conexão
+                const { error } = await supabaseClient.from('markets').select('count').limit(1);
                 
-                if (testQuery.error) throw testQuery.error;
+                if (error) {
+                    throw error;
+                }
                 
-                debugLog('Supabase conectado com sucesso');
                 showConnectionStatus('Conectado ao banco de dados', 'success');
                 return true;
             } catch (error) {
                 console.error('Erro ao conectar:', error);
-                showConnectionStatus('Erro na conexão com o banco de dados', 'error');
+                showConnectionStatus('Erro na conexão. Verifique as credenciais do Supabase.', 'error');
                 return false;
             }
         }
@@ -702,32 +1030,30 @@
         function showConnectionStatus(message, type) {
             const statusDiv = document.getElementById('connectionStatus');
             if (statusDiv) {
-                statusDiv.className = 'connection-status ' + type;
+                statusDiv.className = `connection-status ${type}`;
                 statusDiv.textContent = message;
                 
                 if (type === 'success') {
-                    setTimeout(function() {
+                    setTimeout(() => {
                         statusDiv.style.display = 'none';
                     }, 3000);
                 }
             }
         }
 
-        function showToast(message, duration, isError) {
-            if (duration === undefined) duration = 2000;
-            if (isError === undefined) isError = false;
-            
-            debugLog('Toast: ' + message);
+        // Toast notification
+        function showToast(message, duration = 2000, isError = false) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = 'toast show';
             if (isError) toast.classList.add('error');
             
-            setTimeout(function() {
+            setTimeout(() => {
                 toast.className = 'toast';
             }, duration);
         }
 
+        // Navegação
         function showLoginScreen() {
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
@@ -738,64 +1064,61 @@
             document.getElementById('registerScreen').classList.remove('hidden');
         }
 
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        // Autenticação
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             const type = document.getElementById('loginType').value;
 
-            debugLog('Tentando login', { email: email, type: type });
-
             try {
                 if (type === 'owner') {
-                    const result = await supabaseClient
+                    const { data, error } = await supabaseClient
                         .from('markets')
                         .select('*')
                         .eq('email', email)
                         .single();
 
-                    if (result.error || !result.data) {
+                    if (error || !data) {
                         throw new Error('Dono não encontrado.');
                     }
                     
-                    if (result.data.password === password) {
-                        marketData = result.data;
+                    if (data.password === password) {
+                        marketData = data;
                         currentUser = { 
                             type: 'owner', 
                             name: marketData.name, 
                             email: email, 
                             market_id: marketData.id 
                         };
-                        debugLog('Login owner bem-sucedido', currentUser);
                         await showPDV();
                     } else {
                         showToast('E-mail ou senha incorretos!', 3000, true);
                     }
                 } else {
-                    const result = await supabaseClient
+                    const { data: operator, error } = await supabaseClient
                         .from('operators')
                         .select('*, markets(*)')
                         .eq('email', email)
                         .single();
 
-                    if (result.error || !result.data) {
+                    if (error || !operator) {
                         throw new Error('Operador não encontrado.');
                     }
                     
-                    if (result.data.password === password) {
-                        if (!result.data.active) {
+                    if (operator.password === password) {
+                        if (!operator.active) {
                             showToast('Operador desativado. Contate o administrador.', 3000, true);
                             return;
                         }
-                        marketData = result.data.markets;
+                        marketData = operator.markets;
                         currentUser = { 
                             type: 'operator', 
-                            name: result.data.name, 
+                            name: operator.name, 
                             email: email, 
                             market_id: marketData.id 
                         };
-                        debugLog('Login operator bem-sucedido', currentUser);
                         await showPDV();
                     } else {
                         showToast('E-mail ou senha incorretos!', 3000, true);
@@ -807,7 +1130,7 @@
             }
         });
 
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const newMarket = {
@@ -820,33 +1143,35 @@
                 logo: document.getElementById('regLogo').value.trim() || ''
             };
 
-            debugLog('Registrando mercado', newMarket);
-
             try {
-                const result = await supabaseClient
+                const { data, error } = await supabaseClient
                     .from('markets')
                     .insert([newMarket])
                     .select();
 
-                if (result.error) throw result.error;
+                if (error) throw error;
 
                 showToast('Mercado cadastrado com sucesso!', 3000);
                 showLoginScreen();
                 document.getElementById('registerForm').reset();
             } catch (error) {
                 console.error('Erro ao cadastrar:', error);
-                showToast('Erro ao cadastrar mercado', 3000, true);
+                showToast('Erro ao cadastrar. Email ou CNPJ já cadastrados.', 3000, true);
             }
         });
 
+        // PDV
         async function showPDV() {
-            debugLog('Mostrando PDV');
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
             document.getElementById('pdvScreen').style.display = 'block';
             
             document.getElementById('userNameDisplay').textContent = currentUser.name;
-            document.getElementById('marketNameDisplay').textContent = marketData ? marketData.name : 'Sistema PDV';
+            document.getElementById('marketNameDisplay').textContent = marketData?.name || 'Sistema PDV';
+            
+            if (currentUser.type === 'operator') {
+                document.getElementById('adminBtn').style.display = 'none';
+            }
             
             await loadProducts();
             renderCart();
@@ -854,38 +1179,27 @@
 
         function logout() {
             if (confirm('Deseja realmente sair?')) {
-                debugLog('Logout');
                 currentUser = null;
                 marketData = null;
                 productsCache = [];
                 cart = [];
                 document.getElementById('pdvScreen').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'none';
                 showLoginScreen();
             }
         }
 
         async function loadProducts() {
             try {
-                debugLog('Carregando produtos para market_id: ' + currentUser.market_id);
-                
-                const result = await supabaseClient
+                const { data: products, error } = await supabaseClient
                     .from('products')
                     .select('*')
                     .eq('market_id', currentUser.market_id)
                     .order('name');
 
-                if (result.error) {
-                    console.error('Erro Supabase ao carregar produtos:', result.error);
-                    throw result.error;
-                }
+                if (error) throw error;
                 
-                productsCache = result.data || [];
-                debugLog('Produtos carregados: ' + productsCache.length);
-                
-                if (productsCache.length === 0) {
-                    debugLog('AVISO: Nenhum produto encontrado para este mercado');
-                }
-                
+                productsCache = products || [];
                 renderProducts();
             } catch (error) {
                 console.error("Erro ao carregar produtos:", error);
@@ -898,168 +1212,98 @@
             const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
             const codeSearch = document.getElementById('productCode').value.toLowerCase();
             
-            let filteredProducts = productsCache.slice();
+            let filteredProducts = productsCache;
             
             if (searchTerm) {
-                filteredProducts = filteredProducts.filter(function(p) {
-                    return p.name.toLowerCase().includes(searchTerm) || 
-                           (p.code && p.code.toLowerCase().includes(searchTerm));
-                });
+                filteredProducts = filteredProducts.filter(p => 
+                    p.name.toLowerCase().includes(searchTerm) || 
+                    (p.code && p.code.toLowerCase().includes(searchTerm))
+                );
             }
             
             if (codeSearch) {
-                filteredProducts = filteredProducts.filter(function(p) {
-                    return (p.code && p.code.toLowerCase().includes(codeSearch));
-                });
+                filteredProducts = filteredProducts.filter(p => 
+                    (p.code && p.code.toLowerCase().includes(codeSearch))
+                );
             }
-            
-            debugLog('Renderizando produtos filtrados: ' + filteredProducts.length);
             
             if (filteredProducts.length === 0) {
                 grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #6b7280;">Nenhum produto encontrado</p>';
                 return;
             }
             
-            grid.innerHTML = filteredProducts.map(function(p) {
-                return '<div class="product-card" data-product-id="' + p.id + '">' +
-                    '<h4>' + p.name + '</h4>' +
-                    '<div class="price">R$ ' + parseFloat(p.price).toFixed(2) + '</div>' +
-                    '<div class="stock-info">Estoque: ' + p.stock + '</div>' +
-                    '</div>';
-            }).join('');
-            
-            // Adicionar event listeners aos produtos
-            const productCards = grid.querySelectorAll('.product-card');
-            debugLog('Cards de produtos criados: ' + productCards.length);
-            
-            productCards.forEach(function(card) {
-                card.addEventListener('click', function() {
-                    const productIdStr = this.getAttribute('data-product-id');
-                    const productId = parseInt(productIdStr, 10);
-                    debugLog('Card clicado! ID (string): ' + productIdStr + ', ID (number): ' + productId);
-                    addToCart(productId);
-                });
-            });
+            grid.innerHTML = filteredProducts.map(p => `
+                <div class="product-card" onclick="addToCart(${p.id})">
+                    <h4>${p.name}</h4>
+                    <div class="price">R$ ${parseFloat(p.price).toFixed(2)}</div>
+                    <div class="stock-info">Estoque: ${p.stock}</div>
+                </div>
+            `).join('');
         }
 
+        document.getElementById('searchProduct').addEventListener('input', renderProducts);
+        document.getElementById('productCode').addEventListener('input', renderProducts);
+
         function addToCart(productId) {
-            debugLog('Adicionando produto ao carrinho, ID: ' + productId);
-            debugLog('Cache de produtos atual:', productsCache);
-            debugLog('Tipo do productId:', typeof productId);
-            
-            const product = productsCache.find(function(p) {
-                debugLog('Comparando: p.id=' + p.id + ' (tipo: ' + typeof p.id + ') com productId=' + productId + ' (tipo: ' + typeof productId + ')');
-                return p.id == productId; // Usando == ao invés de === para permitir conversão de tipo
-            });
+            const product = productsCache.find(p => p.id === productId);
             
             if (!product) {
-                debugLog('ERRO: Produto não encontrado no cache. ID buscado: ' + productId);
-                debugLog('IDs disponíveis no cache:', productsCache.map(function(p) { return p.id; }));
                 showToast("Produto não encontrado!", 2000, true);
                 return;
             }
             
-            debugLog('Produto encontrado:', product);
-            
             if (product.stock <= 0) {
-                debugLog('ERRO: Produto sem estoque', product);
                 showToast("Produto sem estoque!", 2000, true);
                 return;
             }
             
-            const cartItem = cart.find(function(item) {
-                return item.id == productId; // Usando == ao invés de ===
-            });
+            const cartItem = cart.find(item => item.id === productId);
             
             if (cartItem) {
                 if (cartItem.qty >= product.stock) {
-                    debugLog('ERRO: Quantidade máxima atingida', cartItem);
                     showToast("Quantidade máxima em estoque atingida!", 2000, true);
                     return;
                 }
                 cartItem.qty++;
-                debugLog('Quantidade atualizada:', cartItem);
             } else {
-                const newItem = {
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    stock: product.stock,
-                    qty: 1
-                };
-                cart.push(newItem);
-                debugLog('Novo item adicionado ao carrinho');
+                cart.push({...product, qty: 1});
             }
             
-            debugLog('Carrinho atual:', cart);
-            showToast(product.name + ' adicionado');
+            showToast(`${product.name} adicionado`);
             renderCart();
         }
 
         function renderCart() {
-            debugLog('Renderizando carrinho, itens: ' + cart.length);
-            
             const cartDiv = document.getElementById('cartItems');
             
             if (cart.length === 0) {
                 cartDiv.innerHTML = '<p style="text-align: center; color: #6b7280;">Carrinho vazio</p>';
             } else {
-                cartDiv.innerHTML = cart.map(function(item) {
-                    return '<div class="cart-item">' +
-                        '<div class="cart-item-info">' +
-                            '<h4>' + item.name + '</h4>' +
-                            '<p>R$ ' + parseFloat(item.price).toFixed(2) + ' cada</p>' +
-                        '</div>' +
-                        '<div class="cart-item-actions">' +
-                            '<button class="qty-btn" data-action="decrease" data-id="' + item.id + '">-</button>' +
-                            '<span class="qty-display">' + item.qty + '</span>' +
-                            '<button class="qty-btn" data-action="increase" data-id="' + item.id + '">+</button>' +
-                            '<button class="btn-remove" data-id="' + item.id + '">×</button>' +
-                        '</div>' +
-                    '</div>';
-                }).join('');
-                
-                // Event listeners para botões do carrinho
-                cartDiv.querySelectorAll('.qty-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        const productId = parseInt(this.getAttribute('data-id'));
-                        const action = this.getAttribute('data-action');
-                        const change = action === 'increase' ? 1 : -1;
-                        updateQty(productId, change);
-                    });
-                });
-                
-                cartDiv.querySelectorAll('.btn-remove').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        const productId = parseInt(this.getAttribute('data-id'));
-                        removeFromCart(productId);
-                    });
-                });
+                cartDiv.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <h4>${item.name}</h4>
+                            <p>R$ ${parseFloat(item.price).toFixed(2)} cada</p>
+                        </div>
+                        <div class="cart-item-actions">
+                            <button class="qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
+                            <span class="qty-display">${item.qty}</span>
+                            <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+                            <button class="btn-remove" onclick="removeFromCart(${item.id})">×</button>
+                        </div>
+                    </div>
+                `).join('');
             }
             
             updateTotals();
         }
 
         function updateQty(productId, change) {
-            debugLog('Atualizando quantidade', { productId: productId, change: change });
-            
-            const cartItem = cart.find(function(item) {
-                return item.id == productId; // Usando ==
-            });
-            
-            if (!cartItem) {
-                debugLog('ERRO: Item não encontrado no carrinho');
-                return;
-            }
+            const cartItem = cart.find(item => item.id === productId);
+            if (!cartItem) return;
 
-            const product = productsCache.find(function(p) {
-                return p.id == productId; // Usando ==
-            });
-            
-            if (!product) {
-                debugLog('ERRO: Produto não encontrado no cache');
-                return;
-            }
+            const product = productsCache.find(p => p.id === productId);
+            if (!product) return;
             
             cartItem.qty += change;
             
@@ -1074,17 +1318,12 @@
         }
 
         function removeFromCart(productId) {
-            debugLog('Removendo item do carrinho: ' + productId);
-            cart = cart.filter(function(item) {
-                return item.id !== productId;
-            });
+            cart = cart.filter(item => item.id !== productId);
             renderCart();
         }
 
         function clearCart() {
             if (cart.length > 0 && !confirm('Deseja realmente limpar o carrinho?')) return;
-            
-            debugLog('Limpando carrinho');
             cart = [];
             document.getElementById('receivedValue').value = '';
             document.getElementById('changeValue').value = '';
@@ -1092,40 +1331,34 @@
         }
 
         function updateTotals() {
-            const subtotal = cart.reduce(function(sum, item) {
-                return sum + (parseFloat(item.price) * item.qty);
-            }, 0);
-            
+            const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.qty), 0);
             document.getElementById('subtotal').textContent = 'R$ ' + subtotal.toFixed(2);
             document.getElementById('total').textContent = 'R$ ' + subtotal.toFixed(2);
-            
-            debugLog('Totais atualizados: ' + subtotal);
         }
+
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', function() {
+                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
+                this.classList.add('active');
+                selectedPayment = this.dataset.method;
+            });
+        });
 
         document.getElementById('receivedValue').addEventListener('input', function() {
             const received = parseFloat(this.value) || 0;
-            const total = cart.reduce(function(sum, item) {
-                return sum + (parseFloat(item.price) * item.qty);
-            }, 0);
+            const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.qty), 0);
             const change = received - total;
             document.getElementById('changeValue').value = change >= 0 ? 'R$ ' + change.toFixed(2) : 'R$ 0,00';
         });
 
         async function finalizeSale() {
-            debugLog('Iniciando finalização de venda');
-            
             if (cart.length === 0) {
                 showToast('Carrinho vazio!', 2000, true);
                 return;
             }
             
-            const total = cart.reduce(function(sum, item) {
-                return sum + (parseFloat(item.price) * item.qty);
-            }, 0);
-            
+            const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.qty), 0);
             const received = parseFloat(document.getElementById('receivedValue').value) || 0;
-            
-            debugLog('Valores da venda', { total: total, received: received, payment: selectedPayment });
             
             if (selectedPayment === 'money' && received < total) {
                 showToast('Valor recebido insuficiente!', 2000, true);
@@ -1134,26 +1367,16 @@
             
             try {
                 // Atualizar estoque
-                debugLog('Atualizando estoque dos produtos...');
-                for (let i = 0; i < cart.length; i++) {
-                    const item = cart[i];
+                for (const item of cart) {
                     const newStock = item.stock - item.qty;
-                    debugLog('Atualizando produto ' + item.id + ': estoque ' + item.stock + ' -> ' + newStock);
-                    
-                    const updateResult = await supabaseClient
+                    const { error } = await supabaseClient
                         .from('products')
                         .update({ stock: newStock })
                         .eq('id', item.id);
                     
-                    if (updateResult.error) {
-                        console.error('Erro ao atualizar estoque:', updateResult.error);
-                        throw updateResult.error;
-                    }
+                    if (error) throw error;
                     
-                    const cachedProduct = productsCache.find(function(p) {
-                        return p.id === item.id;
-                    });
-                    
+                    const cachedProduct = productsCache.find(p => p.id === item.id);
                     if (cachedProduct) {
                         cachedProduct.stock = newStock;
                     }
@@ -1170,21 +1393,16 @@
                     market_id: currentUser.market_id
                 };
                 
-                debugLog('Salvando venda:', saleData);
-                
-                const saleResult = await supabaseClient
+                const { data: newSale, error: saleError } = await supabaseClient
                     .from('sales')
                     .insert([saleData])
                     .select()
                     .single();
 
-                if (saleResult.error) {
-                    console.error('Erro ao salvar venda:', saleResult.error);
-                    throw saleResult.error;
-                }
+                if (saleError) throw saleError;
 
-                debugLog('Venda finalizada com sucesso:', saleResult.data);
                 showToast("Venda finalizada com sucesso!");
+                showCupom(newSale);
                 
                 cart = [];
                 document.getElementById('receivedValue').value = '';
@@ -1194,39 +1412,569 @@
 
             } catch (error) {
                 console.error("Erro ao finalizar venda:", error);
-                showToast("Erro ao finalizar venda: " + error.message, 3000, true);
+                showToast("Erro ao finalizar venda", 3000, true);
             }
         }
 
-        // Event Listeners
-        document.getElementById('linkRegister').addEventListener('click', showRegisterScreen);
-        document.getElementById('linkLogin').addEventListener('click', showLoginScreen);
-        document.getElementById('btnLogout').addEventListener('click', logout);
-        document.getElementById('searchProduct').addEventListener('input', renderProducts);
-        document.getElementById('productCode').addEventListener('input', renderProducts);
-        document.getElementById('btnClearCart').addEventListener('click', clearCart);
-        document.getElementById('btnFinalizeSale').addEventListener('click', finalizeSale);
+        // Cupom Fiscal
+        function showCupom(sale) {
+            const paymentNames = {
+                money: 'DINHEIRO',
+                debit: 'DÉBITO',
+                credit: 'CRÉDITO',
+                pix: 'PIX'
+            };
+            
+            let cupomHTML = `
+                <div class="cupom-header">
+                    ${marketData?.logo ? `<img src="${marketData.logo}" alt="Logo" style="max-width: 100px; margin-bottom: 10px;">` : ''}
+                    <h3>${marketData?.name || 'SUPERMERCADO'}</h3>
+                    <p>CNPJ: ${marketData?.cnpj || 'Não informado'}</p>
+                    <p>${marketData?.address || 'Endereço não informado'}</p>
+                    <p>Tel: ${marketData?.phone || 'Não informado'}</p>
+                </div>
+                <div style="margin: 15px 0;">
+                    <strong>CUPOM FISCAL</strong><br>
+                    Data: ${new Date(sale.created_at).toLocaleString('pt-BR')}<br>
+                    Operador: ${sale.operator}
+                </div>
+                <div style="border-top: 1px dashed #333; border-bottom: 1px dashed #333; padding: 10px 0; margin: 10px 0;">
+            `;
+            
+            sale.items.forEach(item => {
+                cupomHTML += `
+                    <div class="cupom-item">
+                        <div>
+                            <div><strong>${item.name}</strong></div>
+                            <div style="font-size: 11px;">${item.qty} x R$ ${parseFloat(item.price).toFixed(2)}</div>
+                        </div>
+                        <div><strong>R$ ${(parseFloat(item.price) * item.qty).toFixed(2)}</strong></div>
+                    </div>
+                `;
+            });
+            
+            cupomHTML += `
+                </div>
+                <div class="cupom-total">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>TOTAL:</span>
+                        <span>R$ ${parseFloat(sale.total).toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>FORMA PAGTO:</span>
+                        <span>${paymentNames[sale.payment]}</span>
+                    </div>
+            `;
+            
+            if (sale.payment === 'money') {
+                cupomHTML += `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>RECEBIDO:</span>
+                        <span>R$ ${parseFloat(sale.received).toFixed(2)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>TROCO:</span>
+                        <span>R$ ${parseFloat(sale.change).toFixed(2)}</span>
+                    </div>
+                `;
+            }
+            
+            cupomHTML += `
+                </div>
+                <div class="cupom-footer">
+                    <p>Obrigado pela preferência!</p>
+                    <p>Volte sempre!</p>
+                    <p style="margin-top: 10px;">Sistema PDV - Venda #${sale.id}</p>
+                </div>
+            `;
+            
+            document.getElementById('cupomContent').innerHTML = cupomHTML;
+            document.getElementById('cupomModal').classList.add('active');
+        }
 
-        // Payment methods
-        document.getElementById('paymentMethods').addEventListener('click', function(e) {
-            if (e.target.classList.contains('payment-method')) {
-                document.querySelectorAll('.payment-method').forEach(function(m) {
-                    m.classList.remove('active');
-                });
-                e.target.classList.add('active');
-                selectedPayment = e.target.getAttribute('data-method');
-                debugLog('Método de pagamento selecionado: ' + selectedPayment);
+        function closeCupom() {
+            document.getElementById('cupomModal').classList.remove('active');
+        }
+
+        function printCupom() {
+            window.print();
+        }
+
+        // Admin Panel
+        async function toggleAdmin() {
+            if (currentUser?.type !== 'owner') {
+                showToast('Acesso negado!', 2000, true);
+                return;
+            }
+            
+            const pdv = document.getElementById('pdvScreen');
+            const admin = document.getElementById('adminPanel');
+            
+            if (admin.style.display === 'block') {
+                admin.style.display = 'none';
+                pdv.style.display = 'block';
+                await loadProducts();
+            } else {
+                pdv.style.display = 'none';
+                admin.style.display = 'block';
+                await loadAdminData();
+            }
+        }
+
+        function switchTab(event, tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            const tabContentId = 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1);
+            document.getElementById(tabContentId).classList.add('active');
+        }
+
+        async function loadAdminData() {
+            await renderProductsTable();
+            await renderOperatorsTable();
+            await renderSalesTable();
+            loadConfigData();
+        }
+
+        async function renderProductsTable() {
+            try {
+                const { data: products, error } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('market_id', currentUser.market_id)
+                    .order('name');
+                    
+                if (error) throw error;
+                
+                const tbody = document.getElementById('productsTableBody');
+                tbody.innerHTML = (products || []).map(p => `
+                    <tr>
+                        <td>${p.code}</td>
+                        <td>${p.name}</td>
+                        <td>R$ ${parseFloat(p.price).toFixed(2)}</td>
+                        <td>${p.stock}</td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="editProduct(${p.id})">Editar</button>
+                            <button class="btn-small btn-delete" onclick="deleteProduct(${p.id})">Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+            }
+        }
+
+        async function renderOperatorsTable() {
+            try {
+                const { data: operators, error } = await supabaseClient
+                    .from('operators')
+                    .select('*')
+                    .eq('market_id', currentUser.market_id);
+                    
+                if (error) throw error;
+                
+                const tbody = document.getElementById('operatorsTableBody');
+                tbody.innerHTML = (operators || []).map(op => `
+                    <tr>
+                        <td>${op.name}</td>
+                        <td>${op.email}</td>
+                        <td><span style="color: ${op.active ? '#10b981' : '#ef4444'};">${op.active ? 'Ativo' : 'Inativo'}</span></td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="editOperator(${op.id})">Editar</button>
+                            <button class="btn-small btn-delete" onclick="deleteOperator(${op.id})">Excluir</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar operadores:', error);
+            }
+        }
+
+        async function renderSalesTable() {
+            try {
+                const { data: sales, error } = await supabaseClient
+                    .from('sales')
+                    .select('*')
+                    .eq('market_id', currentUser.market_id)
+                    .order('created_at', { ascending: false })
+                    .limit(100);
+                    
+                if (error) throw error;
+                
+                const tbody = document.getElementById('salesTableBody');
+                tbody.innerHTML = (sales || []).map(s => `
+                    <tr>
+                        <td>${new Date(s.created_at).toLocaleString('pt-BR')}</td>
+                        <td>${s.operator}</td>
+                        <td>R$ ${parseFloat(s.total).toFixed(2)}</td>
+                        <td>${s.payment.toUpperCase()}</td>
+                        <td>
+                            <button class="btn-small btn-edit" onclick="viewSale(${s.id})">Ver Detalhes</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar vendas:', error);
+            }
+        }
+        
+        async function generateDailyClosing() {
+            const resultDiv = document.getElementById('dailyClosingResult');
+            resultDiv.innerHTML = '<p>Calculando...</p>';
+
+            const today = new Date();
+            const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0).toISOString();
+            const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString();
+
+            try {
+                const { data: sales, error } = await supabaseClient
+                    .from('sales')
+                    .select('*')
+                    .eq('market_id', currentUser.market_id)
+                    .gte('created_at', startOfDay)
+                    .lte('created_at', endOfDay);
+                    
+                if (error) throw error;
+                
+                if (!sales || sales.length === 0) {
+                    resultDiv.innerHTML = '<p style="margin-top: 20px; color: #6b7280;">Nenhuma venda registrada hoje.</p>';
+                    return;
+                }
+
+                const report = {
+                    totalValue: 0,
+                    transactionCount: sales.length,
+                    payments: { money: 0, debit: 0, credit: 0, pix: 0 }
+                };
+
+                for (const sale of sales) {
+                    const saleTotal = parseFloat(sale.total);
+                    report.totalValue += saleTotal;
+                    if (report.payments.hasOwnProperty(sale.payment)) {
+                        report.payments[sale.payment] += saleTotal;
+                    }
+                }
+                
+                const reportHTML = `
+                    <div class="closing-report">
+                        <h3>Relatório de ${today.toLocaleDateString('pt-BR')}</h3>
+                        <div class="report-item total">
+                            <span>VALOR TOTAL</span>
+                            <span>R$ ${report.totalValue.toFixed(2)}</span>
+                        </div>
+                        <div class="report-item">
+                            <span>Total de Transações</span>
+                            <span>${report.transactionCount}</span>
+                        </div>
+                        <h4 style="margin-top: 25px; margin-bottom: 10px; color: #374151;">Detalhes por Pagamento:</h4>
+                        <div class="report-item">
+                            <span>Dinheiro</span>
+                            <span>R$ ${report.payments.money.toFixed(2)}</span>
+                        </div>
+                        <div class="report-item">
+                            <span>Débito</span>
+                            <span>R$ ${report.payments.debit.toFixed(2)}</span>
+                        </div>
+                        <div class="report-item">
+                            <span>Crédito</span>
+                            <span>R$ ${report.payments.credit.toFixed(2)}</span>
+                        </div>
+                        <div class="report-item">
+                            <span>PIX</span>
+                            <span>R$ ${report.payments.pix.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+                resultDiv.innerHTML = reportHTML;
+            } catch (error) {
+                console.error("Erro ao gerar relatório:", error);
+                resultDiv.innerHTML = '<p style="color: var(--danger);">Erro ao carregar o relatório.</p>';
+            }
+        }
+
+        function loadConfigData() {
+            if (marketData) {
+                document.getElementById('cfgMarketName').value = marketData.name || '';
+                document.getElementById('cfgCNPJ').value = marketData.cnpj || '';
+                document.getElementById('cfgAddress').value = marketData.address || '';
+                document.getElementById('cfgPhone').value = marketData.phone || '';
+                document.getElementById('cfgLogo').value = marketData.logo || '';
+            }
+        }
+
+        document.getElementById('configForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const updatedMarket = {
+                name: document.getElementById('cfgMarketName').value.trim(),
+                cnpj: document.getElementById('cfgCNPJ').value.trim(),
+                address: document.getElementById('cfgAddress').value.trim(),
+                phone: document.getElementById('cfgPhone').value.trim(),
+                logo: document.getElementById('cfgLogo').value.trim()
+            };
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('markets')
+                    .update(updatedMarket)
+                    .eq('id', currentUser.market_id)
+                    .select()
+                    .single();
+                    
+                if (error) throw error;
+                
+                marketData = data;
+                showToast("Configurações salvas com sucesso!");
+            } catch (error) {
+                console.error(error);
+                showToast("Erro ao salvar configurações.", 3000, true);
             }
         });
 
-        // Inicializar aplicação
-        window.addEventListener('DOMContentLoaded', async function() {
-            debugLog('=== SISTEMA PDV INICIANDO ===');
-            const connected = await initSupabase();
+        // CRUD Produtos
+        async function addProduct() {
+            const name = prompt('Nome do produto:');
+            if (!name) return;
             
-            if (!connected) {
-                console.error('FALHA NA CONEXÃO COM SUPABASE');
+            const code = prompt('Código de barras:');
+            if (!code) return;
+            
+            const price = parseFloat(prompt('Preço:'));
+            if (isNaN(price) || price <= 0) {
+                showToast('Preço inválido!', 2000, true);
+                return;
             }
+            
+            const stock = parseInt(prompt('Estoque:'));
+            if (isNaN(stock) || stock < 0) {
+                showToast('Estoque inválido!', 2000, true);
+                return;
+            }
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('products')
+                    .insert([{ 
+                        name, 
+                        code, 
+                        price, 
+                        stock, 
+                        market_id: currentUser.market_id 
+                    }]);
+                    
+                if (error) throw error;
+                
+                showToast("Produto adicionado com sucesso!");
+                await renderProductsTable();
+                await loadProducts();
+            } catch (error) {
+                console.error(error);
+                showToast("Erro ao adicionar produto.", 3000, true);
+            }
+        }
+
+        async function editProduct(id) {
+            try {
+                const { data: product, error: fetchError } = await supabaseClient
+                    .from('products')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                    
+                if (fetchError || !product) {
+                    showToast("Produto não encontrado.", 2000, true);
+                    return;
+                }
+                
+                const name = prompt('Nome do produto:', product.name);
+                if (!name) return;
+                
+                const price = parseFloat(prompt('Preço:', product.price));
+                if (isNaN(price) || price <= 0) {
+                    showToast('Preço inválido!', 2000, true);
+                    return;
+                }
+                
+                const stock = parseInt(prompt('Estoque:', product.stock));
+                if (isNaN(stock) || stock < 0) {
+                    showToast('Estoque inválido!', 2000, true);
+                    return;
+                }
+                
+                const { error } = await supabaseClient
+                    .from('products')
+                    .update({ name, price, stock })
+                    .eq('id', id);
+                    
+                if (error) throw error;
+                
+                showToast("Produto editado com sucesso!");
+                await renderProductsTable();
+                await loadProducts();
+            } catch (error) {
+                console.error(error);
+                showToast("Erro ao editar produto.", 3000, true);
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Deseja realmente excluir este produto?')) return;
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('products')
+                    .delete()
+                    .eq('id', id);
+                    
+                if (error) throw error;
+                
+                showToast("Produto excluído com sucesso!");
+                await renderProductsTable();
+                await loadProducts();
+            } catch (error) {
+                console.error(error);
+                showToast("Erro ao excluir produto.", 3000, true);
+            }
+        }
+
+        // CRUD Operadores
+        async function addOperator() {
+            const name = prompt('Nome do operador:');
+            if (!name) return;
+            
+            const email = prompt('E-mail:');
+            if (!email) return;
+            
+            const password = prompt('Senha:');
+            if (!password) return;
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('operators')
+                    .insert([{ 
+                        name, 
+                        email, 
+                        password, 
+                        active: true, 
+                        market_id: currentUser.market_id 
+                    }]);
+                    
+                if (error) throw error;
+                
+                showToast("Operador adicionado com sucesso!");
+                await renderOperatorsTable();
+            } catch (error) {
+                console.error(error);
+                showToast("Erro ao adicionar operador.", 3000, true);
+            }
+        }
+
+        async function editOperator(id) {
+            try {
+                const { data: operator, error: fetchError } = await supabaseClient
+                    .from('operators')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                    
+                if (fetchError || !operator) {
+                    showToast("Operador não encontrado.", 2000, true);
+                    return;
+                }
+                
+                const name = prompt('Nome do operador:', operator.name);
+                if (!name) return;
+                
+                const email = prompt('E-mail:', operator.email);
+                if (!email) return;
+                
+                const { error } = await supabaseClient
+                    .from('operators')
+                    .update({ name, email })
+                    .eq('id', id);
+                    
+                if (error) throw error;
+                
+                showToast("Operador editado com sucesso!");
+                await renderOperatorsTable();
+            } catch (error) {
+                console.error(error);
+                showToast("Erro ao editar operador.", 3000, true);
+            }
+        }
+
+        async function deleteOperator(id) {
+            if (!confirm('Deseja realmente excluir este operador?')) return;
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('operators')
+                    .delete()
+                    .eq('id', id);
+                    
+                if (error) throw error;
+                
+                showToast("Operador excluído com sucesso!");
+                await renderOperatorsTable();
+            } catch (error) {
+                console.error(error);
+                showToast("Erro ao excluir operador.", 3000, true);
+            }
+        }
+
+        async function viewSale(id) {
+            try {
+                const { data: sale, error } = await supabaseClient
+                    .from('sales')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                    
+                if (error) throw error;
+                
+                showCupom(sale);
+            } catch (error) {
+                console.error(error);
+                showToast("Venda não encontrada.", 2000, true);
+            }
+        }
+
+        // Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    // CORRIGIDO: O nome correto é 'serviceWorker' (com 'W' maiúsculo).
+                    const registration = await navigator.serviceWorker.register(
+                        'data:application/javascript;base64,' + btoa(`
+                            const CACHE_NAME = 'pdv-v1';
+                            const urlsToCache = ['/'];
+                            
+                            self.addEventListener('install', (event) => {
+                                event.waitUntil(
+                                    caches.open(CACHE_NAME)
+                                        .then((cache) => cache.addAll(urlsToCache))
+                                );
+                            });
+                            
+                            self.addEventListener('fetch', (event) => {
+                                event.respondWith(
+                                    fetch(event.request)
+                                        .catch(() => caches.match(event.request))
+                                );
+                            });
+                        `)
+                    );
+                    console.log('Service Worker registrado com sucesso');
+                } catch (err) {
+                    console.log('Erro no Service Worker:', err);
+                }
+            });
+        }
+
+        // Inicializar aplicação
+        window.addEventListener('DOMContentLoaded', async () => {
+            await initSupabase();
         });
     </script>
 </body>

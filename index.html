@@ -930,9 +930,13 @@
             
             // Adicionar event listeners aos produtos
             const productCards = grid.querySelectorAll('.product-card');
+            debugLog('Cards de produtos criados: ' + productCards.length);
+            
             productCards.forEach(function(card) {
                 card.addEventListener('click', function() {
-                    const productId = parseInt(this.getAttribute('data-product-id'));
+                    const productIdStr = this.getAttribute('data-product-id');
+                    const productId = parseInt(productIdStr, 10);
+                    debugLog('Card clicado! ID (string): ' + productIdStr + ', ID (number): ' + productId);
                     addToCart(productId);
                 });
             });
@@ -940,13 +944,17 @@
 
         function addToCart(productId) {
             debugLog('Adicionando produto ao carrinho, ID: ' + productId);
+            debugLog('Cache de produtos atual:', productsCache);
+            debugLog('Tipo do productId:', typeof productId);
             
             const product = productsCache.find(function(p) {
-                return p.id === productId;
+                debugLog('Comparando: p.id=' + p.id + ' (tipo: ' + typeof p.id + ') com productId=' + productId + ' (tipo: ' + typeof productId + ')');
+                return p.id == productId; // Usando == ao invés de === para permitir conversão de tipo
             });
             
             if (!product) {
-                debugLog('ERRO: Produto não encontrado no cache ' + productId);
+                debugLog('ERRO: Produto não encontrado no cache. ID buscado: ' + productId);
+                debugLog('IDs disponíveis no cache:', productsCache.map(function(p) { return p.id; }));
                 showToast("Produto não encontrado!", 2000, true);
                 return;
             }
@@ -960,7 +968,7 @@
             }
             
             const cartItem = cart.find(function(item) {
-                return item.id === productId;
+                return item.id == productId; // Usando == ao invés de ===
             });
             
             if (cartItem) {
@@ -1036,7 +1044,7 @@
             debugLog('Atualizando quantidade', { productId: productId, change: change });
             
             const cartItem = cart.find(function(item) {
-                return item.id === productId;
+                return item.id == productId; // Usando ==
             });
             
             if (!cartItem) {
@@ -1045,7 +1053,7 @@
             }
 
             const product = productsCache.find(function(p) {
-                return p.id === productId;
+                return p.id == productId; // Usando ==
             });
             
             if (!product) {

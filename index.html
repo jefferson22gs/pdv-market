@@ -690,73 +690,76 @@
 
         // Cupom
         function showCupom(sale) {
-    const paymentNames = { money: 'DINHEIRO', debit: 'DÉBITO', credit: 'CRÉDITO', pix: 'PIX' };
+    const paymentLabels = {
+        money: "DINHEIRO",
+        debit: "DÉBITO",
+        credit: "CRÉDITO",
+        pix: "PIX"
+    };
 
-    // Ajuste dos nomes de campo conforme seu banco
-    const operatorName = sale.operator_name || sale.operator || 'Não informado';
-    const paymentMethod = sale.payment_method || sale.payment || 'money';
+    const paymentMethod = sale.payment_method || "money";
+    const operatorName = sale.operator_name || "Não informado";
+    const dateTime = new Date(sale.created_at || Date.now()).toLocaleString("pt-BR");
 
     let cupomHTML = `
-        <div class="cupom-header">
-            ${marketData?.logo ? `<img src="${marketData.logo}" alt="Logo" style="max-width:100px;margin-bottom:10px;">` : ''}
-            <h3>${marketData?.name || 'SUPERMERCADO'}</h3>
-            <p>CNPJ: ${marketData?.cnpj || 'Não informado'}</p>
-            <p>${marketData?.address || 'Endereço não informado'}</p>
-            <p>Tel: ${marketData?.phone || 'Não informado'}</p>
-        </div>
-        <div style="margin:15px 0;">
-            <strong>CUPOM NÃO FISCAL</strong><br>
-            Data: ${new Date(sale.created_at).toLocaleString('pt-BR')}<br>
+        <div style="text-align:center;">
+            <h3>${marketData?.name || "MERCADO"}</h3>
+            <p>CNPJ: ${marketData?.cnpj || "-"}</p>
+            <p>${marketData?.address || ""}</p>
+            <p>Tel: ${marketData?.phone || ""}</p>
+            <hr>
+            <strong>CUPOM FISCAL</strong><br>
+            Data: ${dateTime}<br>
             Operador: ${operatorName}
-        </div>
-        <div style="border-top:1px dashed #333; border-bottom:1px dashed #333; padding:10px 0; margin:10px 0;">
+            <hr>
     `;
+
     (sale.items || []).forEach(item => {
+        const subtotal = item.price * item.qty;
         cupomHTML += `
-            <div class="cupom-item">
-                <div>
-                    <div><strong>${item.name}</strong></div>
-                    <div style="font-size:11px;">${item.qty} x R$ ${parseFloat(item.price || 0).toFixed(2)}</div>
-                </div>
-                <div><strong>R$ ${(parseFloat(item.price || 0) * item.qty).toFixed(2)}</strong></div>
+            <div style="display:flex;justify-content:space-between;">
+                <span>${item.name} (${item.qty}x)</span>
+                <span>R$ ${subtotal.toFixed(2)}</span>
             </div>
         `;
     });
+
     cupomHTML += `
+        <hr>
+        <div style="display:flex;justify-content:space-between;">
+            <span><strong>TOTAL:</strong></span>
+            <span><strong>R$ ${sale.total.toFixed(2)}</strong></span>
         </div>
-        <div class="cupom-total">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span>TOTAL:</span>
-                <span>R$ ${parseFloat(sale.total || 0).toFixed(2)}</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                <span>FORMA PAGTO:</span>
-                <span>${paymentNames[paymentMethod] || paymentMethod.toUpperCase()}</span>
-            </div>
+        <div style="display:flex;justify-content:space-between;">
+            <span>FORMA PAGTO:</span>
+            <span>${paymentLabels[paymentMethod] || paymentMethod.toUpperCase()}</span>
+        </div>
     `;
-    if (paymentMethod === 'money') {
+
+    if (paymentMethod === "money") {
         cupomHTML += `
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <div style="display:flex;justify-content:space-between;">
                 <span>RECEBIDO:</span>
-                <span>R$ ${parseFloat(sale.received || 0).toFixed(2)}</span>
+                <span>R$ ${sale.received?.toFixed(2) || "0.00"}</span>
             </div>
-            <div style="display:flex; justify-content:space-between;">
+            <div style="display:flex;justify-content:space-between;">
                 <span>TROCO:</span>
-                <span>R$ ${parseFloat(sale.change || 0).toFixed(2)}</span>
+                <span>R$ ${sale.change?.toFixed(2) || "0.00"}</span>
             </div>
         `;
     }
+
     cupomHTML += `
-        </div>
-        <div class="cupom-footer">
-            <p>Obrigado pela preferência!</p>
-            <p>Volte sempre!</p>
-            <p style="margin-top:10px;">Sistema PDV - Venda #${sale.id}</p>
-        </div>
+        <hr>
+        <p>Obrigado pela preferência!</p>
+        <p>Volte sempre!</p>
+        <p style="margin-top:10px;">Venda #${sale.id}</p>
     `;
-    document.getElementById('cupomContent').innerHTML = cupomHTML;
-    document.getElementById('cupomModal').classList.add('active');
+
+    document.getElementById("cupomContent").innerHTML = cupomHTML;
+    document.getElementById("cupomModal").classList.add("active");
 }
+
 
 
         function closeCupom() { document.getElementById('cupomModal').classList.remove('active'); }
@@ -1042,6 +1045,7 @@
     </script>
 </body>
 </html>
+
 
 
 

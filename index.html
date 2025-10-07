@@ -662,14 +662,15 @@
                 }
                 // Salvar venda
                 const saleData = {
-                    operator: currentUser.name,
-                    items: cart,
-                    total: total,
-                    payment: selectedPayment,
-                    received: received,
-                    change: received > total ? received - total : 0,
-                    market_id: currentUser.market_id
-                };
+    operator_name: currentUser.name,
+    items: cart,
+    total: total,
+    payment_method: selectedPayment,
+    received: received,
+    change: received > total ? received - total : 0,
+    market_id: currentUser.market_id
+};
+
                 const { data: newSale, error: saleError } = await supabaseClient
                     .from('sales')
                     .insert([saleData])
@@ -1037,4 +1038,5 @@
     </script>
 </body>
 </html>
+
 

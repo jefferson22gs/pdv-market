@@ -1,741 +1,105 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Sistema PDV - Supermercado</title>
     <meta name="theme-color" content="#2563eb"/>
     <meta name="description" content="Sistema de Ponto de Venda para Supermercados"/>
     <link rel="manifest" href='data:application/json;base64,ewogICJuYW1lIjogIlNpc3RlbWEgUERGIFN1cGVybWVyY2FkbyIsCiAgInNob3J0X25hbWUiOiAiUERWIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjMjU2M2ViIiwKICAiZGVzY3JpcHRpb24iOiAiU2lzdGVtYSBkZSBQb250byBkZSBWZW5kYSBwYXJhIFN1cGVybWVyY2Fkb3MiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3BuZztiYXNlNjQsMlZCT1J3MEtHZ29BQUFBTlNVaEVVZ0FBQU1BQUFBREFDQVlBQUFBUz0iLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0='>
     <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAABGdBTUEAALGPC/xhBQAAAA1JREFUeJztwQEBAAAAgiD/r25IQAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8GxYgAAb+lQvoAAAAASUVORK5CYII="/>
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --dark: #1f2937;
-            --light: #f3f4f6;
-            --white: #ffffff;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            padding: 20px;
-        }
-
-        .auth-container {
-            background: var(--white);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            max-width: 450px;
-            margin: 0 auto;
-            animation: slideUp 0.5s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .auth-header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: var(--white);
-            padding: 30px;
-            text-align: center;
-        }
-
-        .auth-header h2 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-
-        .auth-header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-
-        .auth-body {
-            padding: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--dark);
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: var(--white);
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-secondary {
-            background: var(--secondary);
-            color: var(--white);
-            margin-top: 10px;
-        }
-
-        .btn-secondary:hover {
-            background: #059669;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: var(--white);
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .link-btn {
-            text-align: center;
-            margin-top: 15px;
-            color: var(--primary);
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .link-btn:hover {
-            text-decoration: underline;
-        }
-
-        .pdv-container {
-            background: var(--white);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-            display: none;
-            width: 100%;
-        }
-
-        .pdv-header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: var(--white);
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .pdv-header h1 {
-            font-size: 24px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-info span {
-            font-size: 14px;
-        }
-
-        .btn-logout {
-            padding: 8px 20px;
-            background: rgba(255,255,255,0.2);
-            border: 2px solid var(--white);
-            color: var(--white);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-logout:hover {
-            background: var(--white);
-            color: var(--primary);
-        }
-
-        .pdv-body {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 0;
-            height: calc(100vh - 120px);
-        }
-
-        .pdv-left {
-            padding: 30px;
-            overflow-y: auto;
-            border-right: 2px solid var(--light);
-        }
-
-        .pdv-right {
-            padding: 30px;
-            background: var(--light);
-            overflow-y: auto;
-        }
-
-        .search-section {
-            margin-bottom: 30px;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            font-size: 14px;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        .product-card {
-            background: var(--white);
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-            position: relative;
-        }
-
-        .product-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
-        .product-card:active {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 10px rgba(0,0,0,0.15);
-        }
-
-        .product-card h4 {
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: var(--dark);
-            min-height: 40px;
-        }
-
-        .product-card .price {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--secondary);
-        }
-
-        .product-card .stock-info {
-            font-size: 12px;
-            color: #6b7280;
-            margin-top: 5px;
-        }
-
-        .cart-section h3 {
-            margin-bottom: 20px;
-            color: var(--dark);
-        }
-
-        .cart-items {
-            margin-bottom: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .cart-item {
-            background: var(--white);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .cart-item-info h4 {
-            font-size: 14px;
-            margin-bottom: 5px;
-        }
-
-        .cart-item-info p {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .cart-item-actions {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
-
-        .qty-btn {
-            width: 30px;
-            height: 30px;
-            border: none;
-            border-radius: 5px;
-            background: var(--primary);
-            color: var(--white);
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .qty-btn:hover {
-            background: var(--primary-dark);
-        }
-
-        .qty-display {
-            width: 40px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .btn-remove {
-            width: 30px;
-            height: 30px;
-            border: none;
-            border-radius: 5px;
-            background: var(--danger);
-            color: var(--white);
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .cart-total {
-            background: var(--white);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .cart-total .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-
-        .cart-total .total-row.grand-total {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary);
-            padding-top: 10px;
-            border-top: 2px solid var(--light);
-        }
-
-        .payment-section {
-            background: var(--white);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .payment-section h4 {
-            margin-bottom: 15px;
-        }
-
-        .payment-methods {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .payment-method {
-            padding: 12px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .payment-method:hover {
-            border-color: var(--primary);
-        }
-
-        .payment-method.active {
-            background: var(--primary);
-            color: var(--white);
-            border-color: var(--primary);
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--secondary);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 9999;
-            animation: slideIn 0.3s ease;
-            display: none;
-        }
-
-        .toast.show {
-            display: block;
-        }
-
-        .toast.error {
-            background: var(--danger);
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--white);
-            border-radius: 15px;
-            max-width: 400px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: modalSlide 0.3s ease;
-        }
-
-        @keyframes modalSlide {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .cupom-fiscal {
-            padding: 30px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-        }
-
-        .cupom-header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px dashed #333;
-        }
-
-        .cupom-header h3 {
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        .cupom-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            padding-bottom: 5px;
-        }
-
-        .cupom-total {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 2px dashed #333;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .cupom-footer {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 2px dashed #333;
-            font-size: 11px;
-        }
-
-        .modal-actions {
-            padding: 20px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .admin-panel {
-            display: none;
-            padding: 30px;
-        }
-
-        .admin-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--light);
-            flex-wrap: wrap;
-        }
-
-        .admin-tab {
-            padding: 12px 24px;
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            font-weight: 600;
-            color: #6b7280;
-            transition: all 0.3s;
-        }
-
-        .admin-tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .admin-content {
-            display: none;
-        }
-
-        .admin-content.active {
-            display: block;
-        }
-
-        .table-container {
-            background: var(--white);
-            border-radius: 12px;
-            overflow-x: auto;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: var(--primary);
-            color: var(--white);
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-            white-space: nowrap;
-        }
-
-        tbody tr {
-            border-bottom: 1px solid var(--light);
-        }
-
-        tbody tr:hover {
-            background: var(--light);
-        }
-
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 12px;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-edit {
-            background: var(--warning);
-            color: var(--white);
-            margin-right: 5px;
-        }
-
-        .btn-delete {
-            background: var(--danger);
-            color: var(--white);
-        }
-        
-        .closing-report {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 25px;
-            margin-top: 20px;
-        }
-        .closing-report h3 {
-            margin-bottom: 20px;
-            color: var(--dark);
-        }
-        .report-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 16px;
-        }
-        .report-item:last-child {
-            border-bottom: none;
-        }
-        .report-item span:first-child {
-            font-weight: 500;
-            color: #374151;
-        }
-        .report-item span:last-child {
-            font-weight: 600;
-            color: var(--primary-dark);
-        }
-        .report-item.total {
-            font-size: 20px;
-            font-weight: bold;
-            padding-top: 15px;
-            margin-top: 10px;
-            border-top: 2px solid #d1d5db;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .connection-status {
-            padding: 10px 20px;
-            margin: 10px 0;
-            border-radius: 8px;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .connection-status.error {
-            background: #fee;
-            color: #c00;
-            border: 1px solid #fcc;
-        }
-
-        .connection-status.success {
-            background: #efe;
-            color: #060;
-            border: 1px solid #cfc;
-        }
-
-        @media (max-width: 1024px) {
-            .pdv-body {
-                grid-template-columns: 1fr;
-                height: auto;
-            }
-
-            .pdv-right {
-                border-top: 2px solid #e5e7eb;
-                border-right: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 0;
-            }
-
-            .pdv-header {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 15px;
-            }
-
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-        }
+        /* (mesmo CSS do seu original: mantive para não poluir) */
+        * { margin:0; padding:0; box-sizing:border-box; }
+        :root { --primary:#2563eb; --primary-dark:#1d4ed8; --secondary:#10b981; --danger:#ef4444; --warning:#f59e0b; --dark:#1f2937; --light:#f3f4f6; --white:#ffffff; }
+        body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); min-height:100vh; display:flex; align-items:center; justify-content:center;}
+        .container { width:100%; max-width:1400px; padding:20px; }
+        .auth-container { background:var(--white); border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,0.3); overflow:hidden; max-width:450px; margin:0 auto; animation:slideUp .5s ease; }
+        @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)}}
+        .auth-header { background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:var(--white); padding:30px; text-align:center; }
+        .auth-header h2{ font-size:24px; margin-bottom:5px;}
+        .auth-header p{ opacity:.9; font-size:14px;}
+        .auth-body{ padding:30px; }
+        .form-group{ margin-bottom:20px; }
+        .form-group label{ display:block; margin-bottom:8px; color:var(--dark); font-weight:500; font-size:14px;}
+        .form-group input, .form-group select{ width:100%; padding:12px 15px; border:2px solid #e5e7eb; border-radius:10px; font-size:14px; transition:all .3s; }
+        .form-group input:focus, .form-group select:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(37,99,235,.1); }
+        .btn{ width:100%; padding:14px; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; transition:all .3s; text-transform:uppercase; letter-spacing:.5px; }
+        .btn-primary{ background:var(--primary); color:var(--white); } .btn-primary:hover{ background:var(--primary-dark); transform:translateY(-2px); box-shadow:0 10px 20px rgba(37,99,235,.3); }
+        .btn-secondary{ background:var(--secondary); color:var(--white); margin-top:10px; } .btn-secondary:hover{ background:#059669; transform:translateY(-2px); box-shadow:0 10px 20px rgba(16,185,129,.3);}
+        .btn-danger{ background:var(--danger); color:var(--white);} .btn-danger:hover{ background:#dc2626;}
+        .link-btn { text-align:center; margin-top:15px; color:var(--primary); cursor:pointer; font-size:14px; } .link-btn:hover{ text-decoration:underline; }
+        .pdv-container{ background:var(--white); border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.3); overflow:hidden; display:none; width:100%; }
+        .pdv-header{ background:linear-gradient(135deg,var(--primary),var(--primary-dark)); color:var(--white); padding:20px 30px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; }
+        .pdv-header h1{ font-size:24px; }
+        .user-info{ display:flex; align-items:center; gap:15px; }
+        .user-info span{ font-size:14px; }
+        .btn-logout{ padding:8px 20px; background:rgba(255,255,255,.2); border:2px solid var(--white); color:var(--white); border-radius:8px; cursor:pointer; font-size:14px; font-weight:600; transition:all .3s; }
+        .btn-logout:hover{ background:var(--white); color:var(--primary); }
+        .pdv-body{ display:grid; grid-template-columns:1fr 400px; gap:0; height:calc(100vh - 120px); }
+        .pdv-left{ padding:30px; overflow-y:auto; border-right:2px solid var(--light); }
+        .pdv-right{ padding:30px; background:var(--light); overflow-y:auto; }
+        .search-section{ margin-bottom:30px; }
+        .search-box{ display:flex; gap:10px; margin-bottom:20px; }
+        .search-box input{ flex:1; padding:12px 15px; border:2px solid #e5e7eb; border-radius:10px; font-size:14px; }
+        .search-box input:focus{ outline:none; border-color:var(--primary); }
+        .products-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:15px; }
+        .product-card{ background:var(--white); border:2px solid #e5e7eb; border-radius:12px; padding:15px; cursor:pointer; transition:all .3s; text-align:center; position:relative; }
+        .product-card:hover{ border-color:var(--primary); transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,.1); }
+        .product-card h4{ font-size:14px; margin-bottom:8px; color:var(--dark); min-height:40px; }
+        .product-card .price{ font-size:18px; font-weight:bold; color:var(--secondary); }
+        .product-card .stock-info{ font-size:12px; color:#6b7280; margin-top:5px; }
+        .cart-section h3{ margin-bottom:20px; color:var(--dark); }
+        .cart-items{ margin-bottom:20px; max-height:300px; overflow-y:auto; }
+        .cart-item{ background:var(--white); padding:15px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+        .cart-item-info h4{ font-size:14px; margin-bottom:5px; }
+        .cart-item-info p{ font-size:12px; color:#6b7280; }
+        .cart-item-actions{ display:flex; gap:5px; align-items:center; }
+        .qty-btn{ width:30px; height:30px; border:none; border-radius:5px; background:var(--primary); color:var(--white); cursor:pointer; font-weight:bold; }
+        .qty-btn:hover{ background:var(--primary-dark);}
+        .qty-display{ width:40px; text-align:center; font-weight:bold; }
+        .btn-remove{ width:30px; height:30px; border:none; border-radius:5px; background:var(--danger); color:var(--white); cursor:pointer; margin-left:10px; }
+        .cart-total{ background:var(--white); padding:20px; border-radius:10px; margin-bottom:20px; }
+        .cart-total .total-row{ display:flex; justify-content:space-between; margin-bottom:10px; font-size:16px; }
+        .cart-total .total-row.grand-total{ font-size:24px; font-weight:bold; color:var(--primary); padding-top:10px; border-top:2px solid var(--light); }
+        .payment-section{ background:var(--white); padding:20px; border-radius:10px; margin-bottom:15px; }
+        .payment-section h4{ margin-bottom:15px; }
+        .payment-methods{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px; }
+        .payment-method{ padding:12px; border:2px solid #e5e7eb; border-radius:8px; cursor:pointer; text-align:center; transition:all .3s; font-size:13px; font-weight:600; }
+        .payment-method:hover{ border-color:var(--primary); }
+        .payment-method.active{ background:var(--primary); color:var(--white); border-color:var(--primary); }
+        .toast{ position:fixed; bottom:30px; right:30px; background:var(--secondary); color:white; padding:15px 25px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.3); z-index:9999; animation:slideIn .3s ease; display:none; }
+        .toast.show{ display:block; } .toast.error{ background:var(--danger); }
+        @keyframes slideIn { from{ transform:translateX(400px); opacity:0 } to{ transform:translateX(0); opacity:1 } }
+        .modal{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.7); z-index:1000; align-items:center; justify-content:center; padding:20px; }
+        .modal.active{ display:flex; }
+        .modal-content{ background:var(--white); border-radius:15px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; animation:modalSlide .3s ease; }
+        @keyframes modalSlide { from{opacity:0; transform:scale(.9)} to{opacity:1; transform:scale(1)} }
+        .cupom-fiscal{ padding:30px; font-family:'Courier New', monospace; font-size:12px; }
+        .cupom-header{ text-align:center; margin-bottom:20px; padding-bottom:15px; border-bottom:2px dashed #333; }
+        .cupom-header h3{ font-size:16px; margin-bottom:5px; }
+        .cupom-item{ display:flex; justify-content:space-between; margin-bottom:8px; padding-bottom:5px; }
+        .cupom-total{ margin-top:15px; padding-top:15px; border-top:2px dashed #333; font-weight:bold; font-size:14px; }
+        .cupom-footer{ text-align:center; margin-top:20px; padding-top:15px; border-top:2px dashed #333; font-size:11px; }
+        .modal-actions{ padding:20px; display:flex; gap:10px; }
+        .admin-panel{ display:none; padding:30px; }
+        .admin-tabs{ display:flex; gap:10px; margin-bottom:30px; border-bottom:2px solid var(--light); flex-wrap:wrap; }
+        .admin-tab{ padding:12px 24px; background:none; border:none; border-bottom:3px solid transparent; cursor:pointer; font-weight:600; color:#6b7280; transition:all .3s; }
+        .admin-tab.active{ color:var(--primary); border-bottom-color:var(--primary); }
+        .admin-content{ display:none; } .admin-content.active{ display:block; }
+        .table-container{ background:var(--white); border-radius:12px; overflow-x:auto; box-shadow:0 2px 8px rgba(0,0,0,.1); }
+        table{ width:100%; border-collapse:collapse; } thead{ background:var(--primary); color:var(--white); } th, td{ padding:15px; text-align:left; white-space:nowrap; } tbody tr{ border-bottom:1px solid var(--light); } tbody tr:hover{ background:var(--light); }
+        .btn-small{ padding:6px 12px; font-size:12px; border-radius:6px; border:none; cursor:pointer; font-weight:600; transition:all .3s; }
+        .btn-edit{ background:var(--warning); color:var(--white); margin-right:5px; } .btn-delete{ background:var(--danger); color:var(--white); }
+        .closing-report{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:12px; padding:25px; margin-top:20px; } .closing-report h3{ margin-bottom:20px; color:var(--dark); }
+        .report-item{ display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #e5e7eb; font-size:16px; } .report-item:last-child{ border-bottom:none; }
+        .report-item span:first-child{ font-weight:500; color:#374151; } .report-item span:last-child{ font-weight:600; color:var(--primary-dark); } .report-item.total{ font-size:20px; font-weight:bold; padding-top:15px; margin-top:10px; border-top:2px solid #d1d5db; }
+        .hidden{ display:none !important; }
+        .connection-status{ padding:10px 20px; margin:10px 0; border-radius:8px; font-size:14px; text-align:center; }
+        .connection-status.error{ background:#fee; color:#c00; border:1px solid #fcc; } .connection-status.success{ background:#efe; color:#060; border:1px solid #cfc; }
+        @media (max-width:1024px) { .pdv-body{ grid-template-columns:1fr; height:auto; } .pdv-right{ border-top:2px solid #e5e7eb; border-right:none; } }
+        @media (max-width:768px) { .container{ padding:0; } .pdv-header{ flex-direction:column; align-items:flex-start; padding:15px; } .products-grid{ grid-template-columns:repeat(2,1fr); gap:10px; } }
     </style>
 </head>
 <body>
@@ -829,10 +193,10 @@
                         <h3>Produtos</h3>
                         <div class="search-box">
                             <input type="text" id="searchProduct" placeholder="Buscar produto por código ou nome...">
-                            <input type="text" id="productCode" placeholder="Código" style="max-width: 120px;">
+                            <input type="text" id="productCode" placeholder="Código" style="max-width:120px;">
                         </div>
                         <div class="products-grid" id="productsGrid">
-                            <p style="grid-column: 1/-1; text-align: center; color: #6b7280;">Carregando produtos...</p>
+                            <p style="grid-column:1/-1; text-align:center; color:#6b7280;">Carregando produtos...</p>
                         </div>
                     </div>
                 </div>
@@ -840,7 +204,7 @@
                     <div class="cart-section">
                         <h3>Carrinho</h3>
                         <div class="cart-items" id="cartItems">
-                            <p style="text-align: center; color: #6b7280;">Carrinho vazio</p>
+                            <p style="text-align:center; color:#6b7280;">Carrinho vazio</p>
                         </div>
                         <div class="cart-total">
                             <div class="total-row">
@@ -866,7 +230,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Troco</label>
-                                <input type="text" id="changeValue" readonly style="background: #f3f4f6;">
+                                <input type="text" id="changeValue" readonly style="background:#f3f4f6;">
                             </div>
                         </div>
                         <button class="btn btn-secondary" onclick="finalizeSale()">Finalizar Venda</button>
@@ -881,7 +245,7 @@
                 <h1>Painel Administrativo</h1>
                 <button class="btn-logout" onclick="toggleAdmin()">Voltar ao PDV</button>
             </div>
-            <div style="padding: 30px;">
+            <div style="padding:30px;">
                 <div class="admin-tabs">
                     <button class="admin-tab active" onclick="switchTab(event, 'products')">Produtos</button>
                     <button class="admin-tab" onclick="switchTab(event, 'operators')">Operadores</button>
@@ -891,7 +255,7 @@
                 </div>
 
                 <div class="admin-content active" id="tabProducts">
-                    <button class="btn btn-primary" onclick="addProduct()" style="margin-bottom: 20px; width: auto;">+ Adicionar Produto</button>
+                    <button class="btn btn-primary" onclick="addProduct()" style="margin-bottom:20px; width:auto;">+ Adicionar Produto</button>
                     <div class="table-container">
                         <table>
                             <thead>
@@ -909,7 +273,7 @@
                 </div>
 
                 <div class="admin-content" id="tabOperators">
-                    <button class="btn btn-primary" onclick="addOperator()" style="margin-bottom: 20px; width: auto;">+ Adicionar Operador</button>
+                    <button class="btn btn-primary" onclick="addOperator()" style="margin-bottom:20px; width:auto;">+ Adicionar Operador</button>
                     <div class="table-container">
                         <table>
                             <thead>
@@ -943,16 +307,16 @@
                 </div>
                 
                 <div class="admin-content" id="tabClosing">
-                    <h3 style="margin-bottom: 20px;">Fechamento de Caixa Diário</h3>
-                    <button class="btn btn-primary" onclick="generateDailyClosing()" style="width: auto;">Gerar Relatório do Dia</button>
+                    <h3 style="margin-bottom:20px;">Fechamento de Caixa Diário</h3>
+                    <button class="btn btn-primary" onclick="generateDailyClosing()" style="width:auto;">Gerar Relatório do Dia</button>
                     <div id="dailyClosingResult">
-                        <p style="margin-top: 20px; color: #6b7280;">Clique no botão acima para gerar o relatório de vendas de hoje.</p>
+                        <p style="margin-top:20px; color:#6b7280;">Clique no botão acima para gerar o relatório de vendas de hoje.</p>
                     </div>
                 </div>
 
                 <div class="admin-content" id="tabConfig">
-                    <div style="max-width: 600px;">
-                        <h3 style="margin-bottom: 20px;">Dados do Mercado</h3>
+                    <div style="max-width:600px;">
+                        <h3 style="margin-bottom:20px;">Dados do Mercado</h3>
                         <form id="configForm">
                             <div class="form-group">
                                 <label>Nome do Mercado</label>
@@ -974,7 +338,7 @@
                                 <label>Logo (URL)</label>
                                 <input type="text" id="cfgLogo">
                             </div>
-                            <button type="submit" class="btn btn-primary" style="width: auto;">Salvar Alterações</button>
+                            <button type="submit" class="btn btn-primary" style="width:auto;">Salvar Alterações</button>
                         </form>
                     </div>
                 </div>
@@ -995,10 +359,10 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // Configuração do Supabase - SUBSTITUA COM SUAS CREDENCIAIS
+        // Config Supabase - substitua pelas suas credenciais reais
         const SUPABASE_URL = 'https://eymchtbskyhqghjwclkb.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bWNodGJza3locWdoandjbGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3Njk0NjUsImV4cCI6MjA3NTM0NTQ2NX0.eYzu0GHVcezfDZRq8-Eig1G-feXVOPBLU-566jVwfcs';
-        
+
         let supabaseClient;
         let currentUser = null;
         let marketData = null;
@@ -1006,18 +370,16 @@
         let selectedPayment = 'money';
         let productsCache = [];
 
-        // Inicializar Supabase e verificar conexão
         async function initSupabase() {
             try {
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                
-                // Testar conexão
-                const { error } = await supabaseClient.from('markets').select('count').limit(1);
-                
-                if (error) {
-                    throw error;
-                }
-                
+                // testar conexão simples
+                const { data, error } = await supabaseClient
+                    .from('markets')
+                    .select('id')
+                    .limit(1);
+
+                if (error) throw error;
                 showConnectionStatus('Conectado ao banco de dados', 'success');
                 return true;
             } catch (error) {
@@ -1032,25 +394,19 @@
             if (statusDiv) {
                 statusDiv.className = `connection-status ${type}`;
                 statusDiv.textContent = message;
-                
+
                 if (type === 'success') {
-                    setTimeout(() => {
-                        statusDiv.style.display = 'none';
-                    }, 3000);
+                    setTimeout(() => { statusDiv.style.display = 'none'; }, 3000);
                 }
             }
         }
 
-        // Toast notification
         function showToast(message, duration = 2000, isError = false) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.className = 'toast show';
             if (isError) toast.classList.add('error');
-            
-            setTimeout(() => {
-                toast.className = 'toast';
-            }, duration);
+            setTimeout(() => { toast.className = 'toast'; }, duration);
         }
 
         // Navegação
@@ -1058,20 +414,17 @@
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
         }
-
         function showRegisterScreen() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('registerScreen').classList.remove('hidden');
         }
 
-        // Autenticação
+        // Autenticação (mantive o comportamento original)
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
             const type = document.getElementById('loginType').value;
-
             try {
                 if (type === 'owner') {
                     const { data, error } = await supabaseClient
@@ -1079,19 +432,10 @@
                         .select('*')
                         .eq('email', email)
                         .single();
-
-                    if (error || !data) {
-                        throw new Error('Dono não encontrado.');
-                    }
-                    
+                    if (error || !data) throw new Error('Dono não encontrado.');
                     if (data.password === password) {
                         marketData = data;
-                        currentUser = { 
-                            type: 'owner', 
-                            name: marketData.name, 
-                            email: email, 
-                            market_id: marketData.id 
-                        };
+                        currentUser = { type: 'owner', name: marketData.name, email: email, market_id: marketData.id };
                         await showPDV();
                     } else {
                         showToast('E-mail ou senha incorretos!', 3000, true);
@@ -1102,23 +446,11 @@
                         .select('*, markets(*)')
                         .eq('email', email)
                         .single();
-
-                    if (error || !operator) {
-                        throw new Error('Operador não encontrado.');
-                    }
-                    
+                    if (error || !operator) throw new Error('Operador não encontrado.');
                     if (operator.password === password) {
-                        if (!operator.active) {
-                            showToast('Operador desativado. Contate o administrador.', 3000, true);
-                            return;
-                        }
+                        if (!operator.active) { showToast('Operador desativado. Contate o administrador.', 3000, true); return; }
                         marketData = operator.markets;
-                        currentUser = { 
-                            type: 'operator', 
-                            name: operator.name, 
-                            email: email, 
-                            market_id: marketData.id 
-                        };
+                        currentUser = { type: 'operator', name: operator.name, email: email, market_id: marketData.id };
                         await showPDV();
                     } else {
                         showToast('E-mail ou senha incorretos!', 3000, true);
@@ -1132,7 +464,6 @@
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const newMarket = {
                 name: document.getElementById('regMarketName').value.trim(),
                 cnpj: document.getElementById('regCNPJ').value.trim(),
@@ -1142,15 +473,9 @@
                 password: document.getElementById('regPassword').value,
                 logo: document.getElementById('regLogo').value.trim() || ''
             };
-
             try {
-                const { data, error } = await supabaseClient
-                    .from('markets')
-                    .insert([newMarket])
-                    .select();
-
+                const { data, error } = await supabaseClient.from('markets').insert([newMarket]).select();
                 if (error) throw error;
-
                 showToast('Mercado cadastrado com sucesso!', 3000);
                 showLoginScreen();
                 document.getElementById('registerForm').reset();
@@ -1165,24 +490,16 @@
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
             document.getElementById('pdvScreen').style.display = 'block';
-            
             document.getElementById('userNameDisplay').textContent = currentUser.name;
             document.getElementById('marketNameDisplay').textContent = marketData?.name || 'Sistema PDV';
-            
-            if (currentUser.type === 'operator') {
-                document.getElementById('adminBtn').style.display = 'none';
-            }
-            
+            if (currentUser.type === 'operator') document.getElementById('adminBtn').style.display = 'none';
             await loadProducts();
             renderCart();
         }
 
         function logout() {
             if (confirm('Deseja realmente sair?')) {
-                currentUser = null;
-                marketData = null;
-                productsCache = [];
-                cart = [];
+                currentUser = null; marketData = null; productsCache = []; cart = [];
                 document.getElementById('pdvScreen').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'none';
                 showLoginScreen();
@@ -1191,14 +508,13 @@
 
         async function loadProducts() {
             try {
+                if (!currentUser?.market_id) return;
                 const { data: products, error } = await supabaseClient
                     .from('products')
                     .select('*')
                     .eq('market_id', currentUser.market_id)
                     .order('name');
-
                 if (error) throw error;
-                
                 productsCache = products || [];
                 renderProducts();
             } catch (error) {
@@ -1211,32 +527,25 @@
             const grid = document.getElementById('productsGrid');
             const searchTerm = document.getElementById('searchProduct').value.toLowerCase();
             const codeSearch = document.getElementById('productCode').value.toLowerCase();
-            
-            let filteredProducts = productsCache;
-            
+            let filteredProducts = productsCache || [];
             if (searchTerm) {
-                filteredProducts = filteredProducts.filter(p => 
-                    p.name.toLowerCase().includes(searchTerm) || 
+                filteredProducts = filteredProducts.filter(p =>
+                    (p.name && p.name.toLowerCase().includes(searchTerm)) ||
                     (p.code && p.code.toLowerCase().includes(searchTerm))
                 );
             }
-            
             if (codeSearch) {
-                filteredProducts = filteredProducts.filter(p => 
-                    (p.code && p.code.toLowerCase().includes(codeSearch))
-                );
+                filteredProducts = filteredProducts.filter(p => (p.code && p.code.toLowerCase().includes(codeSearch)));
             }
-            
-            if (filteredProducts.length === 0) {
-                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #6b7280;">Nenhum produto encontrado</p>';
+            if (!filteredProducts || filteredProducts.length === 0) {
+                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#6b7280;">Nenhum produto encontrado</p>';
                 return;
             }
-            
             grid.innerHTML = filteredProducts.map(p => `
-                <div class="product-card" onclick="addToCart(${p.id})">
-                    <h4>${p.name}</h4>
-                    <div class="price">R$ ${parseFloat(p.price).toFixed(2)}</div>
-                    <div class="stock-info">Estoque: ${p.stock}</div>
+                <div class="product-card" onclick="addToCart('${String(p.id)}')">
+                    <h4>${(p.name || '').replace(/</g,'&lt;')}</h4>
+                    <div class="price">R$ ${parseFloat(p.price || 0).toFixed(2)}</div>
+                    <div class="stock-info">Estoque: ${p.stock ?? 0}</div>
                 </div>
             `).join('');
         }
@@ -1245,80 +554,63 @@
         document.getElementById('productCode').addEventListener('input', renderProducts);
 
         function addToCart(productId) {
-            const product = productsCache.find(p => p.id === productId);
-            
-            if (!product) {
-                showToast("Produto não encontrado!", 2000, true);
-                return;
-            }
-            
-            if (product.stock <= 0) {
-                showToast("Produto sem estoque!", 2000, true);
-                return;
-            }
-            
-            const cartItem = cart.find(item => item.id === productId);
-            
+            productId = String(productId);
+            const product = (productsCache || []).find(p => String(p.id) === productId);
+            if (!product) { showToast("Produto não encontrado!", 2000, true); return; }
+            if ((product.stock ?? 0) <= 0) { showToast("Produto sem estoque!", 2000, true); return; }
+            const cartItem = cart.find(item => String(item.id) === productId);
             if (cartItem) {
-                if (cartItem.qty >= product.stock) {
-                    showToast("Quantidade máxima em estoque atingida!", 2000, true);
-                    return;
-                }
+                if (cartItem.qty >= (product.stock ?? 0)) { showToast("Quantidade máxima em estoque atingida!", 2000, true); return; }
                 cartItem.qty++;
             } else {
-                cart.push({...product, qty: 1});
+                // adiciona cópia do produto com qty
+                cart.push(Object.assign({}, product, { qty: 1 }));
             }
-            
             showToast(`${product.name} adicionado`);
             renderCart();
         }
 
         function renderCart() {
             const cartDiv = document.getElementById('cartItems');
-            
-            if (cart.length === 0) {
-                cartDiv.innerHTML = '<p style="text-align: center; color: #6b7280;">Carrinho vazio</p>';
+            if (!cart || cart.length === 0) {
+                cartDiv.innerHTML = '<p style="text-align:center; color:#6b7280;">Carrinho vazio</p>';
             } else {
                 cartDiv.innerHTML = cart.map(item => `
                     <div class="cart-item">
                         <div class="cart-item-info">
-                            <h4>${item.name}</h4>
-                            <p>R$ ${parseFloat(item.price).toFixed(2)} cada</p>
+                            <h4>${(item.name||'').replace(/</g,'&lt;')}</h4>
+                            <p>R$ ${parseFloat(item.price || 0).toFixed(2)} cada</p>
                         </div>
                         <div class="cart-item-actions">
-                            <button class="qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
+                            <button class="qty-btn" onclick="updateQty('${String(item.id)}', -1)">-</button>
                             <span class="qty-display">${item.qty}</span>
-                            <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
-                            <button class="btn-remove" onclick="removeFromCart(${item.id})">×</button>
+                            <button class="qty-btn" onclick="updateQty('${String(item.id)}', 1)">+</button>
+                            <button class="btn-remove" onclick="removeFromCart('${String(item.id)}')">×</button>
                         </div>
                     </div>
                 `).join('');
             }
-            
             updateTotals();
         }
 
         function updateQty(productId, change) {
-            const cartItem = cart.find(item => item.id === productId);
+            productId = String(productId);
+            const cartItem = cart.find(item => String(item.id) === productId);
             if (!cartItem) return;
-
-            const product = productsCache.find(p => p.id === productId);
+            const product = (productsCache || []).find(p => String(p.id) === productId);
             if (!product) return;
-            
             cartItem.qty += change;
-            
-            if (cartItem.qty <= 0) {
-                removeFromCart(productId);
-            } else if (cartItem.qty > product.stock) {
-                cartItem.qty = product.stock;
+            if (cartItem.qty <= 0) { removeFromCart(productId); return; }
+            if (cartItem.qty > (product.stock ?? 0)) {
+                cartItem.qty = product.stock ?? cartItem.qty;
                 showToast("Quantidade máxima atingida!", 2000, true);
             }
-            
             renderCart();
         }
 
         function removeFromCart(productId) {
-            cart = cart.filter(item => item.id !== productId);
+            productId = String(productId);
+            cart = (cart || []).filter(item => String(item.id) !== productId);
             renderCart();
         }
 
@@ -1331,7 +623,7 @@
         }
 
         function updateTotals() {
-            const subtotal = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.qty), 0);
+            const subtotal = (cart || []).reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.qty || 0)), 0);
             document.getElementById('subtotal').textContent = 'R$ ' + subtotal.toFixed(2);
             document.getElementById('total').textContent = 'R$ ' + subtotal.toFixed(2);
         }
@@ -1346,42 +638,28 @@
 
         document.getElementById('receivedValue').addEventListener('input', function() {
             const received = parseFloat(this.value) || 0;
-            const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.qty), 0);
+            const total = (cart || []).reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.qty || 0)), 0);
             const change = received - total;
             document.getElementById('changeValue').value = change >= 0 ? 'R$ ' + change.toFixed(2) : 'R$ 0,00';
         });
 
         async function finalizeSale() {
-            if (cart.length === 0) {
-                showToast('Carrinho vazio!', 2000, true);
-                return;
-            }
-            
-            const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) * item.qty), 0);
+            if (!cart || cart.length === 0) { showToast('Carrinho vazio!', 2000, true); return; }
+            const total = (cart || []).reduce((sum, item) => sum + (parseFloat(item.price || 0) * (item.qty || 0)), 0);
             const received = parseFloat(document.getElementById('receivedValue').value) || 0;
-            
-            if (selectedPayment === 'money' && received < total) {
-                showToast('Valor recebido insuficiente!', 2000, true);
-                return;
-            }
-            
+            if (selectedPayment === 'money' && received < total) { showToast('Valor recebido insuficiente!', 2000, true); return; }
             try {
-                // Atualizar estoque
+                // Atualiza estoque
                 for (const item of cart) {
-                    const newStock = item.stock - item.qty;
+                    const newStock = (item.stock ?? 0) - (item.qty ?? 0);
                     const { error } = await supabaseClient
                         .from('products')
                         .update({ stock: newStock })
                         .eq('id', item.id);
-                    
                     if (error) throw error;
-                    
-                    const cachedProduct = productsCache.find(p => p.id === item.id);
-                    if (cachedProduct) {
-                        cachedProduct.stock = newStock;
-                    }
+                    const cachedProduct = (productsCache || []).find(p => String(p.id) === String(item.id));
+                    if (cachedProduct) cachedProduct.stock = newStock;
                 }
-                
                 // Salvar venda
                 const saleData = {
                     operator: currentUser.name,
@@ -1392,139 +670,105 @@
                     change: received > total ? received - total : 0,
                     market_id: currentUser.market_id
                 };
-                
                 const { data: newSale, error: saleError } = await supabaseClient
                     .from('sales')
                     .insert([saleData])
                     .select()
                     .single();
-
                 if (saleError) throw saleError;
-
                 showToast("Venda finalizada com sucesso!");
                 showCupom(newSale);
-                
                 cart = [];
                 document.getElementById('receivedValue').value = '';
                 document.getElementById('changeValue').value = '';
                 renderCart();
                 renderProducts();
-
             } catch (error) {
                 console.error("Erro ao finalizar venda:", error);
                 showToast("Erro ao finalizar venda", 3000, true);
             }
         }
 
-        // Cupom Fiscal
+        // Cupom
         function showCupom(sale) {
-            const paymentNames = {
-                money: 'DINHEIRO',
-                debit: 'DÉBITO',
-                credit: 'CRÉDITO',
-                pix: 'PIX'
-            };
-            
+            const paymentNames = { money:'DINHEIRO', debit:'DÉBITO', credit:'CRÉDITO', pix:'PIX' };
             let cupomHTML = `
                 <div class="cupom-header">
-                    ${marketData?.logo ? `<img src="${marketData.logo}" alt="Logo" style="max-width: 100px; margin-bottom: 10px;">` : ''}
+                    ${marketData?.logo ? `<img src="${marketData.logo}" alt="Logo" style="max-width:100px;margin-bottom:10px;">` : ''}
                     <h3>${marketData?.name || 'SUPERMERCADO'}</h3>
                     <p>CNPJ: ${marketData?.cnpj || 'Não informado'}</p>
                     <p>${marketData?.address || 'Endereço não informado'}</p>
                     <p>Tel: ${marketData?.phone || 'Não informado'}</p>
                 </div>
-                <div style="margin: 15px 0;">
+                <div style="margin:15px 0;">
                     <strong>CUPOM FISCAL</strong><br>
                     Data: ${new Date(sale.created_at).toLocaleString('pt-BR')}<br>
                     Operador: ${sale.operator}
                 </div>
-                <div style="border-top: 1px dashed #333; border-bottom: 1px dashed #333; padding: 10px 0; margin: 10px 0;">
+                <div style="border-top:1px dashed #333; border-bottom:1px dashed #333; padding:10px 0; margin:10px 0;">
             `;
-            
-            sale.items.forEach(item => {
+            (sale.items || []).forEach(item => {
                 cupomHTML += `
                     <div class="cupom-item">
                         <div>
                             <div><strong>${item.name}</strong></div>
-                            <div style="font-size: 11px;">${item.qty} x R$ ${parseFloat(item.price).toFixed(2)}</div>
+                            <div style="font-size:11px;">${item.qty} x R$ ${parseFloat(item.price || 0).toFixed(2)}</div>
                         </div>
-                        <div><strong>R$ ${(parseFloat(item.price) * item.qty).toFixed(2)}</strong></div>
+                        <div><strong>R$ ${(parseFloat(item.price || 0) * item.qty).toFixed(2)}</strong></div>
                     </div>
                 `;
             });
-            
             cupomHTML += `
                 </div>
                 <div class="cupom-total">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                         <span>TOTAL:</span>
-                        <span>R$ ${parseFloat(sale.total).toFixed(2)}</span>
+                        <span>R$ ${parseFloat(sale.total || 0).toFixed(2)}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                         <span>FORMA PAGTO:</span>
                         <span>${paymentNames[sale.payment]}</span>
                     </div>
             `;
-            
             if (sale.payment === 'money') {
                 cupomHTML += `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                         <span>RECEBIDO:</span>
-                        <span>R$ ${parseFloat(sale.received).toFixed(2)}</span>
+                        <span>R$ ${parseFloat(sale.received || 0).toFixed(2)}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between;">
+                    <div style="display:flex; justify-content:space-between;">
                         <span>TROCO:</span>
-                        <span>R$ ${parseFloat(sale.change).toFixed(2)}</span>
+                        <span>R$ ${parseFloat(sale.change || 0).toFixed(2)}</span>
                     </div>
                 `;
             }
-            
             cupomHTML += `
                 </div>
                 <div class="cupom-footer">
                     <p>Obrigado pela preferência!</p>
                     <p>Volte sempre!</p>
-                    <p style="margin-top: 10px;">Sistema PDV - Venda #${sale.id}</p>
+                    <p style="margin-top:10px;">Sistema PDV - Venda #${sale.id}</p>
                 </div>
             `;
-            
             document.getElementById('cupomContent').innerHTML = cupomHTML;
             document.getElementById('cupomModal').classList.add('active');
         }
 
-        function closeCupom() {
-            document.getElementById('cupomModal').classList.remove('active');
-        }
+        function closeCupom() { document.getElementById('cupomModal').classList.remove('active'); }
+        function printCupom() { window.print(); }
 
-        function printCupom() {
-            window.print();
-        }
-
-        // Admin Panel
+        // Admin
         async function toggleAdmin() {
-            if (currentUser?.type !== 'owner') {
-                showToast('Acesso negado!', 2000, true);
-                return;
-            }
-            
+            if (currentUser?.type !== 'owner') { showToast('Acesso negado!', 2000, true); return; }
             const pdv = document.getElementById('pdvScreen');
             const admin = document.getElementById('adminPanel');
-            
-            if (admin.style.display === 'block') {
-                admin.style.display = 'none';
-                pdv.style.display = 'block';
-                await loadProducts();
-            } else {
-                pdv.style.display = 'none';
-                admin.style.display = 'block';
-                await loadAdminData();
-            }
+            if (admin.style.display === 'block') { admin.style.display = 'none'; pdv.style.display = 'block'; await loadProducts(); }
+            else { pdv.style.display = 'none'; admin.style.display = 'block'; await loadAdminData(); }
         }
 
         function switchTab(event, tab) {
             document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.admin-content').forEach(c => c.classList.remove('active'));
-            
             event.target.classList.add('active');
             const tabContentId = 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1);
             document.getElementById(tabContentId).classList.add('active');
@@ -1544,25 +788,21 @@
                     .select('*')
                     .eq('market_id', currentUser.market_id)
                     .order('name');
-                    
                 if (error) throw error;
-                
                 const tbody = document.getElementById('productsTableBody');
                 tbody.innerHTML = (products || []).map(p => `
                     <tr>
-                        <td>${p.code}</td>
-                        <td>${p.name}</td>
-                        <td>R$ ${parseFloat(p.price).toFixed(2)}</td>
-                        <td>${p.stock}</td>
+                        <td>${p.code || ''}</td>
+                        <td>${p.name || ''}</td>
+                        <td>R$ ${parseFloat(p.price || 0).toFixed(2)}</td>
+                        <td>${p.stock ?? 0}</td>
                         <td>
-                            <button class="btn-small btn-edit" onclick="editProduct(${p.id})">Editar</button>
-                            <button class="btn-small btn-delete" onclick="deleteProduct(${p.id})">Excluir</button>
+                            <button class="btn-small btn-edit" onclick="editProduct('${String(p.id)}')">Editar</button>
+                            <button class="btn-small btn-delete" onclick="deleteProduct('${String(p.id)}')">Excluir</button>
                         </td>
                     </tr>
                 `).join('');
-            } catch (error) {
-                console.error('Erro ao carregar produtos:', error);
-            }
+            } catch (error) { console.error('Erro ao carregar produtos:', error); }
         }
 
         async function renderOperatorsTable() {
@@ -1571,24 +811,20 @@
                     .from('operators')
                     .select('*')
                     .eq('market_id', currentUser.market_id);
-                    
                 if (error) throw error;
-                
                 const tbody = document.getElementById('operatorsTableBody');
                 tbody.innerHTML = (operators || []).map(op => `
                     <tr>
                         <td>${op.name}</td>
                         <td>${op.email}</td>
-                        <td><span style="color: ${op.active ? '#10b981' : '#ef4444'};">${op.active ? 'Ativo' : 'Inativo'}</span></td>
+                        <td><span style="color:${op.active ? '#10b981' : '#ef4444'};">${op.active ? 'Ativo' : 'Inativo'}</span></td>
                         <td>
-                            <button class="btn-small btn-edit" onclick="editOperator(${op.id})">Editar</button>
-                            <button class="btn-small btn-delete" onclick="deleteOperator(${op.id})">Excluir</button>
+                            <button class="btn-small btn-edit" onclick="editOperator('${String(op.id)}')">Editar</button>
+                            <button class="btn-small btn-delete" onclick="deleteOperator('${String(op.id)}')">Excluir</button>
                         </td>
                     </tr>
                 `).join('');
-            } catch (error) {
-                console.error('Erro ao carregar operadores:', error);
-            }
+            } catch (error) { console.error('Erro ao carregar operadores:', error); }
         }
 
         async function renderSalesTable() {
@@ -1597,36 +833,30 @@
                     .from('sales')
                     .select('*')
                     .eq('market_id', currentUser.market_id)
-                    .order('created_at', { ascending: false })
+                    .order('created_at', { ascending:false })
                     .limit(100);
-                    
                 if (error) throw error;
-                
                 const tbody = document.getElementById('salesTableBody');
                 tbody.innerHTML = (sales || []).map(s => `
                     <tr>
                         <td>${new Date(s.created_at).toLocaleString('pt-BR')}</td>
                         <td>${s.operator}</td>
-                        <td>R$ ${parseFloat(s.total).toFixed(2)}</td>
-                        <td>${s.payment.toUpperCase()}</td>
+                        <td>R$ ${parseFloat(s.total || 0).toFixed(2)}</td>
+                        <td>${(s.payment || '').toUpperCase()}</td>
                         <td>
-                            <button class="btn-small btn-edit" onclick="viewSale(${s.id})">Ver Detalhes</button>
+                            <button class="btn-small btn-edit" onclick="viewSale('${String(s.id)}')">Ver Detalhes</button>
                         </td>
                     </tr>
                 `).join('');
-            } catch (error) {
-                console.error('Erro ao carregar vendas:', error);
-            }
+            } catch (error) { console.error('Erro ao carregar vendas:', error); }
         }
-        
+
         async function generateDailyClosing() {
             const resultDiv = document.getElementById('dailyClosingResult');
             resultDiv.innerHTML = '<p>Calculando...</p>';
-
             const today = new Date();
-            const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0).toISOString();
-            const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString();
-
+            const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0,0,0).toISOString();
+            const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23,59,59).toISOString();
             try {
                 const { data: sales, error } = await supabaseClient
                     .from('sales')
@@ -1634,28 +864,14 @@
                     .eq('market_id', currentUser.market_id)
                     .gte('created_at', startOfDay)
                     .lte('created_at', endOfDay);
-                    
                 if (error) throw error;
-                
-                if (!sales || sales.length === 0) {
-                    resultDiv.innerHTML = '<p style="margin-top: 20px; color: #6b7280;">Nenhuma venda registrada hoje.</p>';
-                    return;
-                }
-
-                const report = {
-                    totalValue: 0,
-                    transactionCount: sales.length,
-                    payments: { money: 0, debit: 0, credit: 0, pix: 0 }
-                };
-
+                if (!sales || sales.length === 0) { resultDiv.innerHTML = '<p style="margin-top:20px; color:#6b7280;">Nenhuma venda registrada hoje.</p>'; return; }
+                const report = { totalValue:0, transactionCount:sales.length, payments:{ money:0, debit:0, credit:0, pix:0 } };
                 for (const sale of sales) {
-                    const saleTotal = parseFloat(sale.total);
+                    const saleTotal = parseFloat(sale.total || 0);
                     report.totalValue += saleTotal;
-                    if (report.payments.hasOwnProperty(sale.payment)) {
-                        report.payments[sale.payment] += saleTotal;
-                    }
+                    if (report.payments.hasOwnProperty(sale.payment)) report.payments[sale.payment] += saleTotal;
                 }
-                
                 const reportHTML = `
                     <div class="closing-report">
                         <h3>Relatório de ${today.toLocaleDateString('pt-BR')}</h3>
@@ -1667,23 +883,11 @@
                             <span>Total de Transações</span>
                             <span>${report.transactionCount}</span>
                         </div>
-                        <h4 style="margin-top: 25px; margin-bottom: 10px; color: #374151;">Detalhes por Pagamento:</h4>
-                        <div class="report-item">
-                            <span>Dinheiro</span>
-                            <span>R$ ${report.payments.money.toFixed(2)}</span>
-                        </div>
-                        <div class="report-item">
-                            <span>Débito</span>
-                            <span>R$ ${report.payments.debit.toFixed(2)}</span>
-                        </div>
-                        <div class="report-item">
-                            <span>Crédito</span>
-                            <span>R$ ${report.payments.credit.toFixed(2)}</span>
-                        </div>
-                        <div class="report-item">
-                            <span>PIX</span>
-                            <span>R$ ${report.payments.pix.toFixed(2)}</span>
-                        </div>
+                        <h4 style="margin-top:25px; margin-bottom:10px; color:#374151;">Detalhes por Pagamento:</h4>
+                        <div class="report-item"><span>Dinheiro</span><span>R$ ${report.payments.money.toFixed(2)}</span></div>
+                        <div class="report-item"><span>Débito</span><span>R$ ${report.payments.debit.toFixed(2)}</span></div>
+                        <div class="report-item"><span>Crédito</span><span>R$ ${report.payments.credit.toFixed(2)}</span></div>
+                        <div class="report-item"><span>PIX</span><span>R$ ${report.payments.pix.toFixed(2)}</span></div>
                     </div>
                 `;
                 resultDiv.innerHTML = reportHTML;
@@ -1705,7 +909,6 @@
 
         document.getElementById('configForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const updatedMarket = {
                 name: document.getElementById('cfgMarketName').value.trim(),
                 cnpj: document.getElementById('cfgCNPJ').value.trim(),
@@ -1713,7 +916,6 @@
                 phone: document.getElementById('cfgPhone').value.trim(),
                 logo: document.getElementById('cfgLogo').value.trim()
             };
-            
             try {
                 const { data, error } = await supabaseClient
                     .from('markets')
@@ -1721,9 +923,7 @@
                     .eq('id', currentUser.market_id)
                     .select()
                     .single();
-                    
                 if (error) throw error;
-                
                 marketData = data;
                 showToast("Configurações salvas com sucesso!");
             } catch (error) {
@@ -1732,247 +932,122 @@
             }
         });
 
-        // CRUD Produtos
+        // CRUD Produtos (com ids tratados como strings)
         async function addProduct() {
-            const name = prompt('Nome do produto:');
-            if (!name) return;
-            
-            const code = prompt('Código de barras:');
-            if (!code) return;
-            
-            const price = parseFloat(prompt('Preço:'));
-            if (isNaN(price) || price <= 0) {
-                showToast('Preço inválido!', 2000, true);
-                return;
-            }
-            
-            const stock = parseInt(prompt('Estoque:'));
-            if (isNaN(stock) || stock < 0) {
-                showToast('Estoque inválido!', 2000, true);
-                return;
-            }
-            
+            const name = prompt('Nome do produto:'); if (!name) return;
+            const code = prompt('Código de barras:'); if (!code) return;
+            const price = parseFloat(prompt('Preço:')); if (isNaN(price) || price <= 0) { showToast('Preço inválido!', 2000, true); return; }
+            const stock = parseInt(prompt('Estoque:')); if (isNaN(stock) || stock < 0) { showToast('Estoque inválido!', 2000, true); return; }
             try {
-                const { error } = await supabaseClient
-                    .from('products')
-                    .insert([{ 
-                        name, 
-                        code, 
-                        price, 
-                        stock, 
-                        market_id: currentUser.market_id 
-                    }]);
-                    
+                const { error } = await supabaseClient.from('products').insert([{ name, code, price, stock, market_id: currentUser.market_id }]);
                 if (error) throw error;
-                
                 showToast("Produto adicionado com sucesso!");
                 await renderProductsTable();
                 await loadProducts();
-            } catch (error) {
-                console.error(error);
-                showToast("Erro ao adicionar produto.", 3000, true);
-            }
+            } catch (error) { console.error(error); showToast("Erro ao adicionar produto.", 3000, true); }
         }
 
         async function editProduct(id) {
+            id = String(id);
             try {
-                const { data: product, error: fetchError } = await supabaseClient
-                    .from('products')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
-                    
-                if (fetchError || !product) {
-                    showToast("Produto não encontrado.", 2000, true);
-                    return;
-                }
-                
-                const name = prompt('Nome do produto:', product.name);
-                if (!name) return;
-                
-                const price = parseFloat(prompt('Preço:', product.price));
-                if (isNaN(price) || price <= 0) {
-                    showToast('Preço inválido!', 2000, true);
-                    return;
-                }
-                
-                const stock = parseInt(prompt('Estoque:', product.stock));
-                if (isNaN(stock) || stock < 0) {
-                    showToast('Estoque inválido!', 2000, true);
-                    return;
-                }
-                
-                const { error } = await supabaseClient
-                    .from('products')
-                    .update({ name, price, stock })
-                    .eq('id', id);
-                    
+                const { data: product, error: fetchError } = await supabaseClient.from('products').select('*').eq('id', id).single();
+                if (fetchError || !product) { showToast("Produto não encontrado.", 2000, true); return; }
+                const name = prompt('Nome do produto:', product.name); if (!name) return;
+                const price = parseFloat(prompt('Preço:', product.price)); if (isNaN(price) || price <= 0) { showToast('Preço inválido!', 2000, true); return; }
+                const stock = parseInt(prompt('Estoque:', product.stock)); if (isNaN(stock) || stock < 0) { showToast('Estoque inválido!', 2000, true); return; }
+                const { error } = await supabaseClient.from('products').update({ name, price, stock }).eq('id', id);
                 if (error) throw error;
-                
                 showToast("Produto editado com sucesso!");
-                await renderProductsTable();
-                await loadProducts();
-            } catch (error) {
-                console.error(error);
-                showToast("Erro ao editar produto.", 3000, true);
-            }
+                await renderProductsTable(); await loadProducts();
+            } catch (error) { console.error(error); showToast("Erro ao editar produto.", 3000, true); }
         }
 
         async function deleteProduct(id) {
+            id = String(id);
             if (!confirm('Deseja realmente excluir este produto?')) return;
-            
             try {
-                const { error } = await supabaseClient
-                    .from('products')
-                    .delete()
-                    .eq('id', id);
-                    
+                const { error } = await supabaseClient.from('products').delete().eq('id', id);
                 if (error) throw error;
-                
                 showToast("Produto excluído com sucesso!");
-                await renderProductsTable();
-                await loadProducts();
-            } catch (error) {
-                console.error(error);
-                showToast("Erro ao excluir produto.", 3000, true);
-            }
+                await renderProductsTable(); await loadProducts();
+            } catch (error) { console.error(error); showToast("Erro ao excluir produto.", 3000, true); }
         }
 
         // CRUD Operadores
         async function addOperator() {
-            const name = prompt('Nome do operador:');
-            if (!name) return;
-            
-            const email = prompt('E-mail:');
-            if (!email) return;
-            
-            const password = prompt('Senha:');
-            if (!password) return;
-            
+            const name = prompt('Nome do operador:'); if (!name) return;
+            const email = prompt('E-mail:'); if (!email) return;
+            const password = prompt('Senha:'); if (!password) return;
             try {
-                const { error } = await supabaseClient
-                    .from('operators')
-                    .insert([{ 
-                        name, 
-                        email, 
-                        password, 
-                        active: true, 
-                        market_id: currentUser.market_id 
-                    }]);
-                    
+                const { error } = await supabaseClient.from('operators').insert([{ name, email, password, active:true, market_id: currentUser.market_id }]);
                 if (error) throw error;
-                
                 showToast("Operador adicionado com sucesso!");
                 await renderOperatorsTable();
-            } catch (error) {
-                console.error(error);
-                showToast("Erro ao adicionar operador.", 3000, true);
-            }
+            } catch (error) { console.error(error); showToast("Erro ao adicionar operador.", 3000, true); }
         }
 
         async function editOperator(id) {
+            id = String(id);
             try {
-                const { data: operator, error: fetchError } = await supabaseClient
-                    .from('operators')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
-                    
-                if (fetchError || !operator) {
-                    showToast("Operador não encontrado.", 2000, true);
-                    return;
-                }
-                
-                const name = prompt('Nome do operador:', operator.name);
-                if (!name) return;
-                
-                const email = prompt('E-mail:', operator.email);
-                if (!email) return;
-                
-                const { error } = await supabaseClient
-                    .from('operators')
-                    .update({ name, email })
-                    .eq('id', id);
-                    
+                const { data: operator, error: fetchError } = await supabaseClient.from('operators').select('*').eq('id', id).single();
+                if (fetchError || !operator) { showToast("Operador não encontrado.", 2000, true); return; }
+                const name = prompt('Nome do operador:', operator.name); if (!name) return;
+                const email = prompt('E-mail:', operator.email); if (!email) return;
+                const { error } = await supabaseClient.from('operators').update({ name, email }).eq('id', id);
                 if (error) throw error;
-                
-                showToast("Operador editado com sucesso!");
-                await renderOperatorsTable();
-            } catch (error) {
-                console.error(error);
-                showToast("Erro ao editar operador.", 3000, true);
-            }
+                showToast("Operador editado com sucesso!"); await renderOperatorsTable();
+            } catch (error) { console.error(error); showToast("Erro ao editar operador.", 3000, true); }
         }
 
         async function deleteOperator(id) {
+            id = String(id);
             if (!confirm('Deseja realmente excluir este operador?')) return;
-            
             try {
-                const { error } = await supabaseClient
-                    .from('operators')
-                    .delete()
-                    .eq('id', id);
-                    
+                const { error } = await supabaseClient.from('operators').delete().eq('id', id);
                 if (error) throw error;
-                
-                showToast("Operador excluído com sucesso!");
-                await renderOperatorsTable();
-            } catch (error) {
-                console.error(error);
-                showToast("Erro ao excluir operador.", 3000, true);
-            }
+                showToast("Operador excluído com sucesso!"); await renderOperatorsTable();
+            } catch (error) { console.error(error); showToast("Erro ao excluir operador.", 3000, true); }
         }
 
         async function viewSale(id) {
+            id = String(id);
             try {
-                const { data: sale, error } = await supabaseClient
-                    .from('sales')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
-                    
+                const { data: sale, error } = await supabaseClient.from('sales').select('*').eq('id', id).single();
                 if (error) throw error;
-                
                 showCupom(sale);
-            } catch (error) {
-                console.error(error);
-                showToast("Venda não encontrada.", 2000, true);
-            }
+            } catch (error) { console.error(error); showToast("Venda não encontrada.", 2000, true); }
         }
 
-        // Service Worker para PWA
+        // SERVICE WORKER (PWA) - registrando a partir de um Blob para melhor compatibilidade
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', async () => {
                 try {
-                    // CORRIGIDO: O nome correto é 'serviceWorker' (com 'W' maiúsculo).
-                    const registration = await navigator.serviceWorker.register(
-                        'data:application/javascript;base64,' + btoa(`
-                            const CACHE_NAME = 'pdv-v1';
-                            const urlsToCache = ['/'];
-                            
-                            self.addEventListener('install', (event) => {
-                                event.waitUntil(
-                                    caches.open(CACHE_NAME)
-                                        .then((cache) => cache.addAll(urlsToCache))
-                                );
-                            });
-                            
-                            self.addEventListener('fetch', (event) => {
-                                event.respondWith(
-                                    fetch(event.request)
-                                        .catch(() => caches.match(event.request))
-                                );
-                            });
-                        `)
-                    );
-                    console.log('Service Worker registrado com sucesso');
+                    const swCode = `
+                        const CACHE_NAME = 'pdv-v1';
+                        const urlsToCache = ['/'];
+                        self.addEventListener('install', (event) => {
+                            event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache)));
+                        });
+                        self.addEventListener('activate', (event) => {
+                            event.waitUntil(self.clients.claim());
+                        });
+                        self.addEventListener('fetch', (event) => {
+                            event.respondWith(
+                                fetch(event.request).catch(() => caches.match(event.request)).then(resp => resp || caches.match('/'))
+                            );
+                        });
+                    `;
+                    const blob = new Blob([swCode], { type: 'application/javascript' });
+                    const swUrl = URL.createObjectURL(blob);
+                    const registration = await navigator.serviceWorker.register(swUrl);
+                    console.log('Service Worker registrado com sucesso', registration);
                 } catch (err) {
                     console.log('Erro no Service Worker:', err);
                 }
             });
         }
 
-        // Inicializar aplicação
+        // Inicializar
         window.addEventListener('DOMContentLoaded', async () => {
             await initSupabase();
         });
